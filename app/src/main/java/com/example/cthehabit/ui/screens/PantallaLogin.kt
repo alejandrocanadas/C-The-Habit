@@ -1,4 +1,4 @@
-package com.example.cthehabit.ui
+package com.example.cthehabit.ui.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.cthehabit.ui.AuthViewModel
 
 @Composable
 fun PantallaLogin(

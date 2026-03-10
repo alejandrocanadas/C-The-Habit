@@ -4,10 +4,11 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.cthehabit.ui.PantallaInicio
-import com.example.cthehabit.ui.PantallaRegistro
-import com.example.cthehabit.ui.PantallaLogin
-import com.example.cthehabit.ui.PantallaPrincipal
+
+import com.example.cthehabit.ui.screens.PantallaInicio
+import com.example.cthehabit.ui.screens.PantallaLogin
+import com.example.cthehabit.ui.screens.PantallaPrincipal
+import com.example.cthehabit.ui.screens.PantallaRegistro
 
 @Composable
 fun AppNavHost(navController: NavHostController) {
@@ -51,6 +52,3 @@ fun AppNavHost(navController: NavHostController) {
         }
     }
 }
-
-
-
