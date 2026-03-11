@@ -19,7 +19,10 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
-fun PantallaPrincipal() {
+fun PantallaPrincipal(
+    onGraficas24h: () -> Unit,
+    onGraficas7d: () -> Unit
+) {
 
     val context = LocalContext.current
 
@@ -99,6 +102,28 @@ fun PantallaPrincipal() {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Obtener métricas últimos 7 días")
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            if (apps.isNotEmpty() && !modoSieteDias) {
+
+                Button(
+                    onClick = onGraficas24h,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Ver gráficas 24h")
+                }
+            }
+
+            if (apps.isNotEmpty() && modoSieteDias) {
+
+                Button(
+                    onClick = onGraficas7d,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Ver gráficas 7 días")
+                }
             }
 
             Spacer(Modifier.height(12.dp))

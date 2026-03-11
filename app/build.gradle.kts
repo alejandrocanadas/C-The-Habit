@@ -11,13 +11,14 @@ android {
 
     defaultConfig {
         applicationId = "com.example.cthehabit"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+
 
     buildTypes {
         release {
@@ -44,6 +45,9 @@ dependencies {
 
     implementation("androidx.work:work-runtime-ktx:2.9.0")
     implementation("com.google.accompanist:accompanist-drawablepainter:0.32.0")
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
+
     implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
     implementation("com.google.firebase:firebase-auth")
 
