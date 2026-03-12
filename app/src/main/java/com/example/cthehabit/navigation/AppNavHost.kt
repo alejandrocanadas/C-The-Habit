@@ -10,6 +10,8 @@ import com.example.cthehabit.ui.screens.PantallaLogin
 import com.example.cthehabit.ui.screens.PantallaPrincipal
 import com.example.cthehabit.ui.screens.PantallaRegistro
 import com.example.cthehabit.ui.screens.PantallaGraficas
+import com.example.cthehabit.ui.screens.PantallaInicialEncuesta
+import com.example.cthehabit.ui.screens.PantallaPreguntas
 
 @Composable
 fun AppNavHost(navController: NavHostController) {
@@ -31,7 +33,7 @@ fun AppNavHost(navController: NavHostController) {
                 onBack = { navController.popBackStack() },
                 onLogin = { navController.navigate("login") },
                 onRegistroExitoso = {
-                    navController.navigate("main"){
+                    navController.navigate("encuesta"){
                         popUpTo("Inicio") { inclusive = true }
                     }
                 }
@@ -66,6 +68,24 @@ fun AppNavHost(navController: NavHostController) {
             val tipo = backStackEntry.arguments?.getString("tipo") ?: "24h"
 
             PantallaGraficas(tipo = tipo)
+        }
+
+        composable("encuesta") {
+            PantallaInicialEncuesta (
+                onContinuar = {
+                    navController.navigate("preguntas")
+                }
+            )
+        }
+
+        composable("preguntas"){
+            PantallaPreguntas(
+                onFinish = {
+                    navController.navigate("main") {
+                        popUpTo("encuesta") { inclusive = true }
+                    }
+                }
+            )
         }
     }
 }

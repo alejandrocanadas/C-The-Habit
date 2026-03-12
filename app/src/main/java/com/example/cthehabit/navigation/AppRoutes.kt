@@ -6,4 +6,6 @@ object AppRoutes {
     const val REGISTRO = "registro"
     const val LOGIN = "login"
     const val MAIN = "main"
+    const val PREGUNTAS = "preguntas"
+    const val ENCUESTA =  "encuesta"
 }
