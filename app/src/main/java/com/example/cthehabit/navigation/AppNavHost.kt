@@ -18,7 +18,7 @@ fun AppNavHost(navController: NavHostController) {
 
     NavHost(
         navController = navController,
-        startDestination = "encuesta"
+        startDestination = "Inicio"
     ){
 
         composable("Inicio"){
