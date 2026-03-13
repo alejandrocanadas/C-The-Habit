@@ -37,7 +37,7 @@ fun PantallaInicialEncuesta(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFF31258E))
+                .background(Color(0xFF2B2080))
                 .padding(innerPadding)
                 .padding(horizontal = 24.dp)
                 .clickable { onContinuar() },

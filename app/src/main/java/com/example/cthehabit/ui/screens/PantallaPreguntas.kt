@@ -61,12 +61,12 @@ fun PantallaPreguntas(onFinish: () -> Unit) {
         selectedOptions.isNotEmpty()
     }
 
-    val fondoAzul = Color(0xFF4A90F3)
-    val colorTarjeta = Color(0xFFCFE4F5)
-    val colorTarjetaSeleccionada = Color(0xFFB7D4F0)
+    val fondoAzul = Color(0xFF3F8EFC)
+    val colorTarjeta = Color(0xFFACD7F6)
+    val colorTarjetaSeleccionada = Color(0xFF7BBCEB)
     val negro = Color.Black
     val blanco = Color.White
-    val colorBoton = Color(0xFF31258E)
+    val colorBoton = Color(0xFF2567FF)
 
     Scaffold { innerPadding ->
 
