@@ -1,84 +1,72 @@
 package com.example.cthehabit.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-
-import com.example.cthehabit.ui.screens.PantallaInicio
-import com.example.cthehabit.ui.screens.PantallaLogin
-import com.example.cthehabit.ui.screens.PantallaPrincipal
-import com.example.cthehabit.ui.screens.PantallaRegistro
-import com.example.cthehabit.ui.screens.PantallaGraficas
-import com.example.cthehabit.ui.screens.PantallaInicialEncuesta
-import com.example.cthehabit.ui.screens.PantallaPreguntas
+import com.example.cthehabit.ui.AuthViewModel
+import com.example.cthehabit.ui.screens.*
 
 @Composable
-fun AppNavHost(navController: NavHostController) {
+fun AppNavHost(
+    navController: NavHostController,
+    authViewModel: AuthViewModel
+) {
+    val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
 
     NavHost(
         navController = navController,
-        startDestination = "Inicio"
-    ){
+        startDestination = if (isLoggedIn) "main" else "Inicio"
+    ) {
 
-        composable("Inicio"){
+        composable("Inicio") {
             PantallaInicio(
                 onEmpezarClick = { navController.navigate("registro")},
                 onLoginClick = { navController.navigate("login")}
             )
         }
 
-        composable("registro"){
+        composable("registro") {
             PantallaRegistro(
+                authViewModel = authViewModel,
                 onBack = { navController.popBackStack() },
                 onLogin = { navController.navigate("login") },
-                onRegistroExitoso = {
-                    navController.navigate("encuesta"){
-                        popUpTo("Inicio") { inclusive = true }
-                    }
-                }
+                onRegistroExitoso = { navController.navigate("encuesta") {
+                    popUpTo("Inicio") { inclusive = true }
+                }}
             )
         }
 
-        composable("login"){
+        composable("login") {
             PantallaLogin(
+                authViewModel = authViewModel,
                 onBack = { navController.popBackStack() },
                 onRegistro = { navController.navigate("registro") },
-                onLoginExitoso = {
-                    navController.navigate("main"){
-                        popUpTo("Inicio") { inclusive = true }
-                    }
-                }
+                onLoginExitoso = { navController.navigate("main") {
+                    popUpTo("Inicio") { inclusive = true }
+                }}
             )
         }
 
-        composable("main"){
+        composable("main") {
             PantallaPrincipal(
-                onGraficas24h = {
-                    navController.navigate("graficas/24h")
-                },
-                onGraficas7d = {
-                    navController.navigate("graficas/7d")
-                }
+                onGraficas24h = { navController.navigate("graficas/24h") },
+                onGraficas7d = { navController.navigate("graficas/7d") }
             )
         }
 
         composable("graficas/{tipo}") { backStackEntry ->
-
             val tipo = backStackEntry.arguments?.getString("tipo") ?: "24h"
-
             PantallaGraficas(tipo = tipo)
         }
 
         composable("encuesta") {
-            PantallaInicialEncuesta (
-                onContinuar = {
-                    navController.navigate("preguntas")
-                }
-            )
+            PantallaInicialEncuesta(onContinuar = { navController.navigate("preguntas") })
         }
 
-        composable("preguntas"){
+        composable("preguntas") {
             PantallaPreguntas(
                 onFinish = {
                     navController.navigate("main") {

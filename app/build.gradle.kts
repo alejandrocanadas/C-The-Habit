@@ -50,6 +50,7 @@ dependencies {
 
     implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
     implementation("com.google.firebase:firebase-auth")
+    implementation ("androidx.datastore:datastore-preferences:1.1.0-alpha06")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

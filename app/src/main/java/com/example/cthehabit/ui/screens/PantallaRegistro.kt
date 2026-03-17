@@ -8,54 +8,47 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cthehabit.ui.AuthViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun PantallaRegistro(
+    authViewModel: AuthViewModel,
     onBack: () -> Unit,
     onLogin: () -> Unit,
-    onRegistroExitoso: () -> Unit,
-    authViewModel: AuthViewModel = viewModel()
+    onRegistroExitoso: () -> Unit
 ) {
-    var name by remember { mutableStateOf("") } // por ahora no lo usamos en Firebase
+    var name by remember { mutableStateOf("") } // opcional
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
+        modifier = Modifier.fillMaxSize().padding(24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Crear cuenta")
-
+        Text("Crear cuenta", style = MaterialTheme.typography.headlineSmall)
         Spacer(Modifier.height(24.dp))
 
         OutlinedTextField(
-            value = name,
-            onValueChange = { name = it },
-            label = { Text("Nombre") },
-            modifier = Modifier.fillMaxWidth()
+            value = name, onValueChange = { name = it },
+            label = { Text("Nombre") }, modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(Modifier.height(16.dp))
 
         OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Correo electrónico") },
-            modifier = Modifier.fillMaxWidth()
+            value = email, onValueChange = { email = it },
+            label = { Text("Correo electrónico") }, modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(Modifier.height(16.dp))
 
         OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
+            value = password, onValueChange = { password = it },
             label = { Text("Contraseña") },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth()
@@ -66,15 +59,19 @@ fun PantallaRegistro(
             Text(error ?: "", color = MaterialTheme.colorScheme.error)
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(24.dp))
 
         Button(
             onClick = {
                 isLoading = true
                 error = null
-                authViewModel.register(email, password) {
-                    isLoading = false
-                    onRegistroExitoso()
+                scope.launch {
+                    authViewModel.register(
+                        email,
+                        password,
+                        onSuccess = { isLoading = false; onRegistroExitoso() },
+                        onError = { msg -> isLoading = false; error = msg }
+                    )
                 }
             },
             enabled = !isLoading,
@@ -87,15 +84,13 @@ fun PantallaRegistro(
 
         Text(
             text = "¿Ya tienes cuenta? Inicia sesión",
-            modifier = Modifier.clickable { onLogin() }
+            modifier = Modifier.clickable { onLogin() },
+            color = MaterialTheme.colorScheme.primary
         )
 
         Spacer(Modifier.height(16.dp))
 
-        Button(
-            onClick = onBack,
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) {
             Text("Volver")
         }
     }

@@ -8,44 +8,39 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cthehabit.ui.AuthViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun PantallaLogin(
+    authViewModel: AuthViewModel,
     onBack: () -> Unit,
     onRegistro: () -> Unit,
-    onLoginExitoso: () -> Unit,
-    authViewModel: AuthViewModel = viewModel()
+    onLoginExitoso: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
+        modifier = Modifier.fillMaxSize().padding(24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Inicia sesión")
-
+        Text("Inicia sesión", style = MaterialTheme.typography.headlineSmall)
         Spacer(Modifier.height(24.dp))
 
         OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Correo electrónico") },
-            modifier = Modifier.fillMaxWidth()
+            value = email, onValueChange = { email = it },
+            label = { Text("Correo electrónico") }, modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(Modifier.height(16.dp))
 
         OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
+            value = password, onValueChange = { password = it },
             label = { Text("Contraseña") },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth()
@@ -62,9 +57,13 @@ fun PantallaLogin(
             onClick = {
                 isLoading = true
                 error = null
-                authViewModel.login(email, password) {
-                    isLoading = false
-                    onLoginExitoso()
+                scope.launch {
+                    authViewModel.login(
+                        email,
+                        password,
+                        onSuccess = { isLoading = false; onLoginExitoso() },
+                        onError = { msg -> isLoading = false; error = msg }
+                    )
                 }
             },
             enabled = !isLoading,
@@ -77,15 +76,13 @@ fun PantallaLogin(
 
         Text(
             text = "¿No tienes cuenta? Crear cuenta",
-            modifier = Modifier.clickable { onRegistro() }
+            modifier = Modifier.clickable { onRegistro() },
+            color = MaterialTheme.colorScheme.primary
         )
 
         Spacer(Modifier.height(16.dp))
 
-        Button(
-            onClick = onBack,
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) {
             Text("Volver")
         }
     }
