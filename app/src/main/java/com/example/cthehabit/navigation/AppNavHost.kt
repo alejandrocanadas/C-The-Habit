@@ -3,6 +3,7 @@ package com.example.cthehabit.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -15,11 +16,14 @@ fun AppNavHost(
     authViewModel: AuthViewModel
 ) {
     val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
+    val startRoute = remember {
+        if (authViewModel.isLoggedIn.value) "main" else "Inicio"
+    }
 
     NavHost(
         navController = navController,
-        startDestination = if (isLoggedIn) "main" else "Inicio"
-    ) {
+        startDestination = startRoute
+    ){
 
         composable("Inicio") {
             PantallaInicio(

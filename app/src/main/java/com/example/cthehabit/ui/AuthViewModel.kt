@@ -19,7 +19,7 @@ class AuthViewModel(
 ) : ViewModel() {
 
     // Estado de login
-    private val _isLoggedIn = MutableStateFlow(false)
+    private val _isLoggedIn = MutableStateFlow(auth.currentUser != null)
     val isLoggedIn: StateFlow<Boolean> = _isLoggedIn.asStateFlow()
 
     // Cargando
@@ -30,13 +30,13 @@ class AuthViewModel(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
-    init {
+    /*init {
         // Comprobar token al iniciar ViewModel
         viewModelScope.launch {
             val token = sessionManager.getTokenOnce()
             _isLoggedIn.value = token != null
         }
-    }
+    }*/
 
     // 🔹 Login
     fun login(

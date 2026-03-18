@@ -9,6 +9,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.cthehabit.data.entity.AppUsage
 import com.example.cthehabit.data.repositories.getUsageStats
 import com.example.cthehabit.data.repositories.getUsageStatsLast7Days
@@ -26,6 +29,10 @@ fun PantallaPrincipal(
 
     val context = LocalContext.current
 
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    var tienePermiso by remember { mutableStateOf(hasUsageStatsPermission(context)) }
+
     var apps by remember { mutableStateOf(listOf<AppUsage>()) }
     var modoSieteDias by remember { mutableStateOf(false) }
 
@@ -36,6 +43,20 @@ fun PantallaPrincipal(
     }
 
     var remainingTime by remember { mutableStateOf("--") }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                tienePermiso = hasUsageStatsPermission(context)
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     LaunchedEffect(nextSyncTime) {
 
@@ -61,7 +82,7 @@ fun PantallaPrincipal(
             .padding(16.dp)
     ) {
 
-        if (!hasUsageStatsPermission(context)) {
+        if (!tienePermiso) {
 
             Text("Debes conceder permiso de uso para obtener métricas")
 
