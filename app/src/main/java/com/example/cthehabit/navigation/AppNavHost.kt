@@ -56,6 +56,7 @@ fun AppNavHost(
 
         composable("main") {
             PantallaPrincipal(
+                authViewModel = authViewModel,
                 onGraficas24h = { navController.navigate("graficas/24h") },
                 onGraficas7d = { navController.navigate("graficas/7d") }
             )
@@ -72,10 +73,20 @@ fun AppNavHost(
 
         composable("preguntas") {
             PantallaPreguntas(
-                onFinish = {
-                    navController.navigate("main") {
-                        popUpTo("encuesta") { inclusive = true }
-                    }
+                onFinish = { respuestas ->  // ← recibe el mapa
+                    authViewModel.saveQuestionnaire(
+                        answers = respuestas,
+                        onSuccess = {
+                            navController.navigate("main") {
+                                popUpTo("encuesta") { inclusive = true }
+                            }
+                        },
+                        onError = {
+                            navController.navigate("main") {  // navega igual si falla
+                                popUpTo("encuesta") { inclusive = true }
+                            }
+                        }
+                    )
                 }
             )
         }

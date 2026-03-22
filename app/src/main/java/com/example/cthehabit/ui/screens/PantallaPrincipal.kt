@@ -15,14 +15,17 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.cthehabit.data.entity.AppUsage
 import com.example.cthehabit.data.repositories.getUsageStats
 import com.example.cthehabit.data.repositories.getUsageStatsLast7Days
+import com.example.cthehabit.ui.AuthViewModel
 import com.example.cthehabit.utils.hasUsageStatsPermission
 import com.example.cthehabit.utils.requestUsagePermission
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
 fun PantallaPrincipal(
+    authViewModel: AuthViewModel,
     onGraficas24h: () -> Unit,
     onGraficas7d: () -> Unit
 ) {
@@ -55,6 +58,16 @@ fun PantallaPrincipal(
 
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        if (tienePermiso) {
+            authViewModel.saveUsageEvent(
+                context = context,
+                onSuccess = { /* opcional: log */ },
+                onError = { /* opcional: log */ }
+            )
         }
     }
 
@@ -127,6 +140,7 @@ fun PantallaPrincipal(
 
             Spacer(Modifier.height(8.dp))
 
+
             if (apps.isNotEmpty() && !modoSieteDias) {
 
                 Button(
@@ -148,6 +162,12 @@ fun PantallaPrincipal(
             }
 
             Spacer(Modifier.height(12.dp))
+
+            Button(onClick = {
+                FirebaseAuth.getInstance().signOut()
+            }) {
+                Text("Sign Out")
+            }
 
             val headerFormat = SimpleDateFormat("d 'de' MMMM", Locale("es", "ES"))
 
@@ -220,6 +240,7 @@ fun PantallaPrincipal(
                     item {
                         Spacer(Modifier.height(8.dp))
                     }
+
                 }
             }
         }

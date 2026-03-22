@@ -46,7 +46,7 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.9.0")
     implementation("com.google.accompanist:accompanist-drawablepainter:0.32.0")
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
-
+    implementation("com.google.firebase:firebase-firestore")
 
     implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
     implementation("com.google.firebase:firebase-auth")

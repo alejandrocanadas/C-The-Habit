@@ -43,7 +43,7 @@ import androidx.compose.runtime.mutableStateMapOf
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun PantallaPreguntas(onFinish: () -> Unit) {
+fun PantallaPreguntas(onFinish: (Map<Int, List<String>>) -> Unit) {
     var currentQuestionIndex by remember { mutableStateOf(0) }
     val respuestas = remember { mutableStateMapOf<Int, List<String>>() }
 
@@ -148,7 +148,8 @@ fun PantallaPreguntas(onFinish: () -> Unit) {
                     if (currentQuestionIndex < questions.size - 1) {
                         currentQuestionIndex++
                     } else {
-                        onFinish()
+                        respuestas[currentQuestionIndex] = selectedOptions.toList()
+                        onFinish(respuestas.toMap())  // ← envía todas las respuestas
                     }
                 },
                 enabled = puedeContinuar,
@@ -215,6 +216,6 @@ fun OpcionCard(
 @Composable
 fun PreviewPantallaPreguntas() {
     PantallaPreguntas(
-        onFinish = {}
+        onFinish = { _ ->}
     )
 }
