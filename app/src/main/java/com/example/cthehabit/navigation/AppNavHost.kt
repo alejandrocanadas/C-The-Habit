@@ -56,6 +56,7 @@ fun AppNavHost(
 
         composable("main") {
             PantallaPrincipal(
+                navController = navController, // agregado
                 authViewModel = authViewModel,
                 onGraficas24h = { navController.navigate("graficas/24h") },
                 onGraficas7d = { navController.navigate("graficas/7d") }
@@ -73,20 +74,29 @@ fun AppNavHost(
 
         composable("preguntas") {
             PantallaPreguntas(
-                onFinish = { respuestas ->  // ← recibe el mapa
+                onFinish = { respuestas ->
                     authViewModel.saveQuestionnaire(
                         answers = respuestas,
                         onSuccess = {
-                            navController.navigate("main") {
-                                popUpTo("encuesta") { inclusive = true }
-                            }
+                            navController.navigate("main") { popUpTo("encuesta") { inclusive = true } }
                         },
                         onError = {
-                            navController.navigate("main") {  // navega igual si falla
-                                popUpTo("encuesta") { inclusive = true }
-                            }
+                            navController.navigate("main") { popUpTo("encuesta") { inclusive = true } }
                         }
                     )
+                }
+            )
+        }
+
+        // --- Ruta de GameScreen ---
+        composable("game/{horas}") { backStackEntry ->
+            val horas = backStackEntry.arguments?.getString("horas")?.toInt() ?: 0
+            GameScreen(
+                horas = horas,
+                onSiguienteClick = {
+                    navController.navigate("main") {
+                        popUpTo("main") { inclusive = true }
+                    }
                 }
             )
         }

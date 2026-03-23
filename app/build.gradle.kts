@@ -43,6 +43,8 @@ android {
 
 dependencies {
 
+    implementation("androidx.appcompat:appcompat:1.6.1") // <--- Agrega esta línea
+
     implementation("androidx.work:work-runtime-ktx:2.9.0")
     implementation("com.google.accompanist:accompanist-drawablepainter:0.32.0")
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
