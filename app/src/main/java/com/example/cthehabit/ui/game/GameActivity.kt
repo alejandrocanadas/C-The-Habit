@@ -1,18 +1,24 @@
 package com.example.cthehabit.ui.game
 
+import android.app.Activity
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 
-class GameActivity : AppCompatActivity() {
+class GameActivity : Activity() {
 
     private lateinit var gameView: GameView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Recibe las horas de la Activity principal
-        val horas = intent.getIntExtra("horas_redes", 0)
-        gameView = GameView(this, horas)
+        // Obtenemos los parámetros que vienen del CharacterSelect
+        val horas = intent.getIntExtra("horas_redes", 0)  // quemamos horas aquí mismo
+        val playerIndex = intent.getIntExtra("playerIndex", 0)
+        val enemyIndex = intent.getIntExtra("enemyIndex", 0)
+
+        // Creamos el GameView con los personajes seleccionados
+        gameView = GameView(this, horas, playerIndex, enemyIndex)
+
+        // Asignamos el GameView como contenido de la actividad
         setContentView(gameView)
     }
 

@@ -1,6 +1,5 @@
 package com.example.cthehabit.ui.screens
 
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -15,6 +14,8 @@ import com.example.cthehabit.ui.game.GameView
 @Composable
 fun GameScreen(
     horas: Int,
+    playerIndex: Int,
+    enemyIndex: Int,
     onSiguienteClick: () -> Unit
 ) {
     val context = LocalContext.current
@@ -30,7 +31,7 @@ fun GameScreen(
         // --- GameView ---
         AndroidView(
             factory = {
-                GameView(context, horas).apply {
+                GameView(context, horas, playerIndex, enemyIndex).apply {
                     resume() // inicia el thread
                 }
             },

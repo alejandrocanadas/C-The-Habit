@@ -26,10 +26,11 @@ import java.util.*
 
 @Composable
 fun PantallaPrincipal(
-    navController: NavHostController, // nuevo
+    navController: NavHostController,
     authViewModel: AuthViewModel,
     onGraficas24h: () -> Unit,
-    onGraficas7d: () -> Unit
+    onGraficas7d: () -> Unit,
+    onJugarClick: (horas: Int) -> Unit // <--- se mantiene
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -106,8 +107,11 @@ fun PantallaPrincipal(
 
             Spacer(Modifier.height(8.dp))
 
-            // --- Botón para ir a GameScreen ---
-            Button(onClick = { navController.navigate("game/1") }, modifier = Modifier.fillMaxWidth()) {
+            // --- ÚNICO BOTÓN "JUGAR AHORA" ---
+            Button(
+                onClick = { onJugarClick(5) }, // <--- aquí se ejecuta tu callback
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Text("Jugar ahora")
             }
 
@@ -148,9 +152,11 @@ fun PantallaPrincipal(
             LazyColumn {
                 groupedApps.forEach { (dayKey, appsForDay) ->
                     item {
-                        Text(headerFormat.format(Date(dayKey)),
+                        Text(
+                            headerFormat.format(Date(dayKey)),
                             style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.padding(vertical = 8.dp))
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
                     }
                     items(appsForDay.sortedByDescending { it.timeInForeground }) { app ->
                         val minutes = app.timeInForeground / 1000 / 60

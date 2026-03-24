@@ -1,5 +1,3 @@
-// data/model/CharacterConfig.kt
-
 package com.example.cthehabit.data.model
 
 import androidx.annotation.DrawableRes
@@ -14,3 +12,4 @@ data class CharacterConfig(
     val isEnemy: Boolean = false,
     val flipped: Boolean = false
 )
+
