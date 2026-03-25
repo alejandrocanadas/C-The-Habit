@@ -6,13 +6,27 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.sp
+import com.example.cthehabit.R
 
 @Composable
 fun PantallaInicio(
     onEmpezarClick: () -> Unit,
     onLoginClick: () -> Unit
 ) {
+
+    val PixelFont = FontFamily(
+        Font(R.font.font_pixel)
+    )
+
+    val PixelFont2 = FontFamily(
+        Font(R.font.font_pixel2)
+    )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -20,9 +34,11 @@ fun PantallaInicio(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("THE HABIT")
+
+        Text("C", fontFamily = PixelFont2, fontSize = 130.sp)
+
+        Text("THE HABIT", fontFamily = PixelFont, fontSize = 50.sp)
         Spacer(Modifier.height(16.dp))
-        Text("CRUSH THE HABIT")
 
         Spacer(Modifier.height(40.dp))
 

@@ -30,7 +30,8 @@ fun PantallaPrincipal(
     authViewModel: AuthViewModel,
     onGraficas24h: () -> Unit,
     onGraficas7d: () -> Unit,
-    onJugarClick: (horas: Int) -> Unit // <--- se mantiene
+    onJugarClick: (horas: Int) -> Unit, // <--- se mantiene
+    onMisionesClick: () -> Unit
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -127,6 +128,13 @@ fun PantallaPrincipal(
                 Button(onClick = onGraficas7d, modifier = Modifier.fillMaxWidth()) {
                     Text("Ver gráficas 7 días")
                 }
+            }
+
+            Button(
+                onClick = onMisionesClick,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Ver misiones")
             }
 
             Spacer(Modifier.height(12.dp))

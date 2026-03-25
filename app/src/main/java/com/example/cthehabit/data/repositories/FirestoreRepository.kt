@@ -6,6 +6,7 @@ import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.example.cthehabit.data.entity.UserMission
 
 class FirestoreRepository {
 
@@ -71,4 +72,107 @@ class FirestoreRepository {
     } catch (e: Exception) {
         Result.failure(e)
     }
+
+    suspend fun saveMissions(missions: List<UserMission>): Result<Unit> = try {
+        val batch = db.batch()
+
+        missions.forEach { mission ->
+            val docRef = db.collection("users")
+                .document(userId)
+                .collection("missions")
+                .document(mission.id)
+
+            batch.set(docRef, mission)
+        }
+
+        batch.commit().await()
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    suspend fun getTodayMissions(date: String): Result<List<UserMission>> = try {
+        val snapshot = db.collection("users")
+            .document(userId)
+            .collection("missions")
+            .whereEqualTo("dateAssigned", date)
+            .whereEqualTo("cancelled", false)
+            .get()
+            .await()
+
+        val missions = snapshot.documents.mapNotNull { doc ->
+            doc.toObject(UserMission::class.java)
+        }
+
+        Result.success(missions)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    suspend fun completeMission(missionId: String): Result<Unit> = try {
+        db.collection("users")
+            .document(userId)
+            .collection("missions")
+            .document(missionId)
+            .update("completed", true)
+            .await()
+
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    suspend fun cancelMission(missionId: String): Result<Unit> = try {
+        db.collection("users")
+            .document(userId)
+            .collection("missions")
+            .document(missionId)
+            .update("cancelled", true)
+            .await()
+
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    suspend fun getQuestionnaire(): Result<Map<String, List<String>>> = try {
+        val snapshot = db.collection("users")
+            .document(userId)
+            .collection("questionnaire")
+            .document("answers")
+            .get()
+            .await()
+
+        val rawAnswers = snapshot.get("answers") as? Map<*, *> ?: emptyMap<Any, Any>()
+
+        val result = rawAnswers.mapNotNull { (key, value) ->
+            val k = key as? String
+            val v = (value as? List<*>)?.mapNotNull { it as? String }
+            if (k != null && v != null) k to v else null
+        }.toMap()
+
+        Result.success(result)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    suspend fun getPendingMissionsBefore(date: String): Result<List<UserMission>> = try {
+        val snapshot = db.collection("users")
+            .document(userId)
+            .collection("missions")
+            .whereEqualTo("completed", false)
+            .whereEqualTo("cancelled", false)
+            .get()
+            .await()
+
+        val missions = snapshot.documents.mapNotNull { doc ->
+            doc.toObject(UserMission::class.java)
+        }.filter { it.dateAssigned < date }
+
+        Result.success(missions)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+
 }

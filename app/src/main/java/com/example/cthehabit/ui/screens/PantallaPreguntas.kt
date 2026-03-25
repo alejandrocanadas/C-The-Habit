@@ -149,7 +149,7 @@ fun PantallaPreguntas(onFinish: (Map<Int, List<String>>) -> Unit) {
                         currentQuestionIndex++
                     } else {
                         respuestas[currentQuestionIndex] = selectedOptions.toList()
-                        onFinish(respuestas.toMap())  // ← envía todas las respuestas
+                        onFinish(respuestas.toMap())
                     }
                 },
                 enabled = puedeContinuar,

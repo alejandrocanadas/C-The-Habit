@@ -12,6 +12,17 @@ import androidx.navigation.compose.composable
 import com.example.cthehabit.ui.AuthViewModel
 import com.example.cthehabit.ui.screens.*
 import com.example.cthehabit.ui.game.GameActivity
+import androidx.compose.runtime.mutableStateOf
+import com.example.cthehabit.data.repositories.FirestoreRepository
+import com.example.cthehabit.utils.Mission
+import com.example.cthehabit.utils.MissionGenerator
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
+import com.example.cthehabit.utils.MissionMapper
+import com.example.cthehabit.utils.getTodayDate
+
 
 @Composable
 fun AppNavHost(
@@ -20,10 +31,14 @@ fun AppNavHost(
 ) {
     val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
     val startRoute = remember {
-        if (authViewModel.isLoggedIn.value) "main" else "Inicio"
+        if (authViewModel.isLoggedIn.value) "Inicio" else "Inicio"
     }
 
     val context = LocalContext.current
+
+    val generatedMissions = remember { mutableStateOf<List<Mission>>(emptyList()) }
+    val firestoreRepository = remember { FirestoreRepository() }
+    val scope = rememberCoroutineScope()
 
     NavHost(
         navController = navController,
@@ -72,7 +87,8 @@ fun AppNavHost(
                 // NUEVO: ir a seleccionar personaje
                 onJugarClick = { horas ->
                     navController.navigate("characterSelect/$horas")
-                }
+                },
+                onMisionesClick = { navController.navigate("misiones") }
             )
         }
 
@@ -88,24 +104,56 @@ fun AppNavHost(
         composable("preguntas") {
             PantallaPreguntas(
                 onFinish = { respuestas ->
-                    authViewModel.saveQuestionnaire(
-                        answers = respuestas,
-                        onSuccess = {
-                            navController.navigate("main") {
-                                popUpTo("encuesta") {
-                                    inclusive = true
-                                }
-                            }
-                        },
-                        onError = {
-                            navController.navigate("main") {
-                                popUpTo("encuesta") {
-                                    inclusive = true
-                                }
-                            }
-                        }
+
+                    val questionnaireMap = mapOf(
+                        "q1" to (respuestas[0] ?: emptyList()),
+                        "q2" to (respuestas[1] ?: emptyList()),
+                        "q3" to (respuestas[2] ?: emptyList())
                     )
+
+                    val hoursAnswer = questionnaireMap["q1"]?.firstOrNull().orEmpty()
+                    val momentAnswer = questionnaireMap["q2"]?.firstOrNull().orEmpty()
+                    val selectedActivities = questionnaireMap["q3"] ?: emptyList()
+
+                    generatedMissions.value = MissionGenerator.generateMissions(
+                        hoursAnswer = hoursAnswer,
+                        momentAnswer = momentAnswer,
+                        selectedActivities = selectedActivities
+                    )
+
+                    scope.launch {
+                        firestoreRepository.saveQuestionnaire(questionnaireMap)
+                    }
+
+                    navController.navigate("misiones_iniciales")
                 }
+            )
+        }
+
+        composable("misiones_iniciales") {
+            PantallaInicialMisiones(
+                missions = generatedMissions.value,
+                onContinuar = {
+                    scope.launch {
+                        val today = getTodayDate()
+                        val missionsToSave = MissionMapper.toUserMissions(
+                            missions = generatedMissions.value,
+                            dateAssigned = today
+                        )
+
+                        firestoreRepository.saveMissions(missionsToSave)
+
+                        navController.navigate("main") {
+                            popUpTo("encuesta") { inclusive = true }
+                        }
+                    }
+                }
+            )
+        }
+
+        composable("misiones") {
+            PantallaPrincipalMisiones(
+                onBack = { navController.popBackStack() }
             )
         }
 
