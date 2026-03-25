@@ -31,7 +31,7 @@ fun AppNavHost(
 ) {
     val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
     val startRoute = remember {
-        if (authViewModel.isLoggedIn.value) "Inicio" else "Inicio"
+        if (authViewModel.isLoggedIn.value) "main" else "Inicio"
     }
 
     val context = LocalContext.current

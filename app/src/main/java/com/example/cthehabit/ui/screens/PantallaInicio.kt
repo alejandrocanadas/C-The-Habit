@@ -23,10 +23,6 @@ fun PantallaInicio(
         Font(R.font.font_pixel)
     )
 
-    val PixelFont2 = FontFamily(
-        Font(R.font.font_pixel2)
-    )
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -35,7 +31,7 @@ fun PantallaInicio(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        Text("C", fontFamily = PixelFont2, fontSize = 130.sp)
+        Text("C", fontFamily = PixelFont, fontSize = 130.sp)
 
         Text("THE HABIT", fontFamily = PixelFont, fontSize = 50.sp)
         Spacer(Modifier.height(16.dp))
