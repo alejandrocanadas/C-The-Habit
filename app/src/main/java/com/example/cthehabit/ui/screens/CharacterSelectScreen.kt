@@ -1,11 +1,11 @@
 package com.example.cthehabit.ui.screens
 
 import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -19,25 +19,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.cthehabit.data.model.Characters
-import com.example.cthehabit.ui.game.GameActivity
 
-// --- Helper para recortar un frame del sprite sheet ---
-fun decodeFirstFrame(context: Context, resId: Int, frameCount: Int = 1): Bitmap {
+fun decodeAndScaleFrame(context: Context, resId: Int, targetHeight: Int, frameCount: Int): Bitmap {
     val sheet = BitmapFactory.decodeResource(context.resources, resId)
     val frameWidth = sheet.width / frameCount
     val frameHeight = sheet.height
-    return Bitmap.createBitmap(sheet, 0, 0, frameWidth, frameHeight)
+    val frameBitmap = Bitmap.createBitmap(sheet, 0, 0, frameWidth, frameHeight)
+    val scaleFactor = targetHeight.toFloat() / frameHeight
+    val newWidth = (frameWidth * scaleFactor).toInt()
+    return Bitmap.createScaledBitmap(frameBitmap, newWidth, targetHeight, false)
 }
 
 @Composable
 fun CharacterSelectScreen(horas: Int, onStartGame: (Int, Int) -> Unit) {
     val context = LocalContext.current
-    var selectedPlayer by remember { mutableStateOf(-1) }
-    var selectedEnemy by remember { mutableStateOf(-1) }
+    var selectedPlayer by remember { mutableStateOf(0) }
 
     Column(
         modifier = Modifier
@@ -45,66 +46,80 @@ fun CharacterSelectScreen(horas: Int, onStartGame: (Int, Int) -> Unit) {
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Selecciona tu personaje", style = MaterialTheme.typography.titleLarge)
+        Text(
+            text = "Selecciona tu Héroe",
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
 
-        LazyVerticalGrid(columns = GridCells.Fixed(2), modifier = Modifier.weight(1f)) {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = Modifier.weight(1f),
+            contentPadding = PaddingValues(8.dp)
+        ) {
             itemsIndexed(Characters.PLAYERS) { index, character ->
+                val isSelected = selectedPlayer == index
+
+                val bitmapPreview = remember(character.idleRes) {
+                    decodeAndScaleFrame(
+                        context = context,
+                        resId = character.idleRes,
+                        targetHeight = 400,
+                        frameCount = character.idleFrames
+                    )
+                }
+
                 Column(
                     modifier = Modifier
-                        .padding(16.dp)
-                        .background(if (selectedPlayer == index) Color.Green.copy(alpha = 0.3f) else Color.Transparent)
+                        .padding(8.dp)
+                        .fillMaxWidth()
+                        .aspectRatio(0.75f)
+                        .border(
+                            width = if (isSelected) 3.dp else 1.dp,
+                            color = if (isSelected) Color(0xFF4CAF50) else Color.Gray.copy(alpha = 0.3f),
+                            shape = MaterialTheme.shapes.medium
+                        )
+                        .background(
+                            color = if (isSelected) Color(0xFF4CAF50).copy(alpha = 0.1f)
+                            else Color.Gray.copy(alpha = 0.05f),
+                            shape = MaterialTheme.shapes.medium
+                        )
                         .clickable { selectedPlayer = index }
-                        .padding(8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .padding(12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    // ✅ Aquí no usamos isNotEmpty ni [0], solo elegimos un drawable fijo
-                    val bitmapPreview = decodeFirstFrame(context, character.hurtRes ?: character.idleRes, frameCount = 4)
                     Image(
                         bitmap = bitmapPreview.asImageBitmap(),
                         contentDescription = character.name,
-                        modifier = Modifier.size(200.dp)
-                    )
-                    Text(character.name)
-                }
-            }
-        }
-
-        Spacer(Modifier.height(16.dp))
-        Text("Selecciona enemigo", style = MaterialTheme.typography.titleLarge)
-
-        LazyVerticalGrid(columns = GridCells.Fixed(2), modifier = Modifier.weight(1f)) {
-            itemsIndexed(Characters.ENEMIES) { index, enemy ->
-                Column(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .background(if (selectedEnemy == index) Color.Red.copy(alpha = 0.3f) else Color.Transparent)
-                        .clickable { selectedEnemy = index }
-                        .padding(8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    val bitmapPreview = decodeFirstFrame(context, enemy.hurtRes ?: enemy.idleRes, frameCount = 4)
-                    Image(
-                        bitmap = bitmapPreview.asImageBitmap(),
-                        contentDescription = enemy.name,
+                        filterQuality = FilterQuality.None,
+                        contentScale = ContentScale.Fit,
                         modifier = Modifier
-                            .size(200.dp)
-                            .graphicsLayer { scaleX = -1f } // enemigo volteado
+                            .weight(1f)
+                            .fillMaxWidth()
                     )
-                    Text(enemy.name)
+
+                    Spacer(Modifier.height(8.dp))
+
+                    Text(
+                        text = character.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = if (isSelected) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurface
+                    )
                 }
             }
         }
 
         Spacer(Modifier.height(16.dp))
+
         Button(
-            onClick = {
-                if (selectedPlayer >= 0 && selectedEnemy >= 0) {
-                    onStartGame(selectedPlayer, selectedEnemy)
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
+            onClick = { onStartGame(selectedPlayer, 0) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .padding(horizontal = 16.dp)
         ) {
-            Text("JUGAR")
+            Text("¡A LUCHAR!", style = MaterialTheme.typography.labelLarge)
         }
     }
 }
