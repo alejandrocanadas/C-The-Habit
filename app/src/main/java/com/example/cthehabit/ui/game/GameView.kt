@@ -2,18 +2,23 @@ package com.example.cthehabit.ui.game
 
 import android.content.Context
 import android.graphics.*
+import android.util.Log
 import android.view.SurfaceView
 import android.view.MotionEvent
 import com.example.cthehabit.R
 import com.example.cthehabit.data.model.Character
 import com.example.cthehabit.data.model.Characters
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import kotlin.math.abs
 
 class GameView(
     context: Context,
     private val horas: Int,
     playerIndex: Int,
-    private var enemyIndex: Int // Índice inicial
+    private var enemyIndex: Int,
+    private var nivelInicial: Int // Recibimos el nivel cargado de Firebase
 ) : SurfaceView(context), Runnable {
 
     private var thread: Thread? = null
@@ -21,27 +26,26 @@ class GameView(
     private var canvas: Canvas? = null
     private val scale = 1.8f
 
-    // --- Imagen de Fondo ---
-    private val backgroundBitmap: Bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.zfall_night)
+    // Firebase
+    private val db = FirebaseFirestore.getInstance()
+    private val userId = FirebaseAuth.getInstance().currentUser?.uid
 
-    // --- Personajes ---
+    private val backgroundBitmap: Bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.zfall_night)
     private val player = Character(context, Characters.PLAYERS[playerIndex])
     private var enemy = Character(context, Characters.ENEMIES[enemyIndex])
 
-    // --- Estados de Control ---
     private var movingLeft = false
     private var movingRight = false
     private var attacking = false
-    private var hasHit = false      // Controla que el jugador pegue 1 vez por clic
-    private var enemyHasHit = false // Controla que el enemigo pegue 1 vez por animación
+    private var hasHit = false
+    private var enemyHasHit = false
 
     private val moveSpeed = 15f
     private val skeletonSpeed = 5f
 
-    // --- Estadísticas ---
-    private var knightHealth = 3    // Siempre 3 toques para el jugador
-    private var nivel = 1
-    private var enemyHealth = 1    // HP inicial = Nivel 1
+    private var knightHealth = 3
+    private var nivel = nivelInicial // Usamos el nivel que vino de Firebase
+    private var enemyHealth = nivel  // La vida del enemigo escala con ese nivel
     private var vidas = 3
 
     private val attackDistance = 150f
@@ -54,9 +58,7 @@ class GameView(
     private val respawnDelayEnemy = 3000L
 
     init {
-        post {
-            resetPositions()
-        }
+        post { resetPositions() }
     }
 
     private fun resetPositions() {
@@ -67,17 +69,24 @@ class GameView(
         enemy.y = sueloY
     }
 
+    // Función para guardar progreso sin borrar lo de tus amigos (merge)
+    private fun saveLevelToFirebase() {
+        if (userId != null) {
+            val data = hashMapOf("currentLevel" to nivel)
+            db.collection("users").document(userId)
+                .set(data, SetOptions.merge()) // El merge protege tus otras subcolecciones
+        }
+    }
+
     override fun run() {
         while (running) {
             if (!holder.surface.isValid) continue
             val now = System.currentTimeMillis()
 
-            // --- Lógica IA Enemigo ---
+            // IA Enemigo
             if (enemy.state != "death" && enemy.state != "hurt" && knightHealth > 0) {
                 val direction = if (enemy.x > player.x) -1 else 1
                 enemy.x += direction * skeletonSpeed
-
-                // Intentar atacar si está cerca
                 if (abs(enemy.x - player.x) < attackDistance && now - lastSkeletonAttackTime >= skeletonAttackInterval) {
                     enemy.state = "attack"
                     enemy.frame = 0
@@ -88,28 +97,28 @@ class GameView(
                 }
             }
 
-            // --- Lógica de Pantalla Infinita (Loop) ---
+            // Loop Infinito
             if (player.x > width) player.x = -50f
             if (player.x < -100f) player.x = width.toFloat()
             if (enemy.x > width) enemy.x = -50f
             if (enemy.x < -100f) enemy.x = width.toFloat()
 
-            // --- Respawn Enemigo y Cambio cada 3 niveles ---
+            // --- RESPAWN ENEMIGO (Aquí sube nivel y guardamos) ---
             if (enemyHealth <= 0 && now >= respawnTimeEnemy) {
                 nivel++
-                enemyHealth = nivel // Sube HP según nivel
+                enemyHealth = nivel
 
-                // CAMBIO DE ENEMIGO CADA 3 NIVELES
+                saveLevelToFirebase() // <--- GUARDADO AUTOMÁTICO
+
                 val nuevoIndice = ((nivel - 1) / 3) % Characters.ENEMIES.size
                 enemy = Character(context, Characters.ENEMIES[nuevoIndice])
-
                 enemy.state = "idle"
                 enemy.frame = 0
                 enemy.y = (height / 2f) * 0.62f
                 enemy.x = if (player.x < width / 2) width - 100f else 100f
             }
 
-            // --- Respawn Jugador ---
+            // Respawn Jugador
             if (knightHealth <= 0 && now >= respawnTimeKnight) {
                 knightHealth = 3
                 player.state = "idle"
@@ -132,24 +141,17 @@ class GameView(
         val destRect = Rect(0, 0, width, mitadAltura)
         canvas?.drawBitmap(backgroundBitmap, null, destRect, null)
 
-        // --- Actualizar Animaciones (Muerte lenta sin repetir) ---
         if (player.state == "death") {
             if (player.frame < player.currentFrameCount() - 1) player.update()
-        } else {
-            player.update()
-        }
+        } else player.update()
 
         if (enemy.state == "death") {
             if (enemy.frame < enemy.currentFrameCount() - 1) enemy.update()
-        } else {
-            enemy.update()
-        }
+        } else enemy.update()
 
-        // --- Movimiento y Estados Player ---
         if (knightHealth > 0 && player.state != "hurt") {
             if (movingLeft) player.x -= moveSpeed
             if (movingRight) player.x += moveSpeed
-
             player.state = when {
                 attacking -> "attack"
                 movingLeft || movingRight -> "walk"
@@ -157,7 +159,6 @@ class GameView(
             }
         }
 
-        // --- Daño al Enemigo (Solo 1 golpe por clic) ---
         if (attacking && !hasHit && player.frame == player.currentFrameCount() / 2) {
             if (abs(player.x - enemy.x) < attackDistance && enemyHealth > 0 && enemy.state != "death") {
                 enemyHealth--
@@ -177,7 +178,6 @@ class GameView(
             hasHit = false
         }
 
-        // --- Daño al Jugador (Solo 1 golpe por animación enemiga) ---
         if (enemy.state == "attack" && !enemyHasHit && enemy.frame == enemy.currentFrameCount() / 2) {
             if (abs(player.x - enemy.x) < 100 && knightHealth > 0 && player.state != "death") {
                 knightHealth--
@@ -194,16 +194,13 @@ class GameView(
             }
         }
 
-        // --- Reset de estados temporales ---
         if (player.state == "hurt" && player.frame >= player.currentFrameCount() - 1) player.state = "idle"
         if (enemy.state == "hurt" && enemy.frame >= enemy.currentFrameCount() - 1) enemy.state = "walk"
         if (enemy.state == "attack" && enemy.frame >= enemy.currentFrameCount() - 1) enemy.state = "walk"
 
-        // --- Dibujar ---
         player.draw(canvas!!, scale)
         enemy.draw(canvas!!, scale)
 
-        // --- HUD ---
         val paint = Paint().apply {
             color = Color.WHITE
             textSize = 45f
@@ -219,7 +216,6 @@ class GameView(
         }
     }
 
-    // --- Funciones de Control ---
     fun startMoveLeft() { movingLeft = true }
     fun stopMoveLeft() { movingLeft = false }
     fun startMoveRight() { movingRight = true }
@@ -241,6 +237,26 @@ class GameView(
     fun pause() {
         running = false
         thread?.join()
+    }
+
+    fun resetLevel() {
+        nivel = 1
+        enemyHealth = 1
+        knightHealth = 3
+
+        // Actualizamos en Firebase inmediatamente
+        if (userId != null) {
+            val data = hashMapOf("currentLevel" to 1)
+            db.collection("users").document(userId)
+                .set(data, SetOptions.merge())
+                .addOnSuccessListener {
+                    Log.d("Firebase", "Nivel reiniciado a 1")
+                    // Reposicionamos personajes
+                    resetPositions()
+                    // Forzamos que el enemigo vuelva al primero de la lista
+                    enemy = Character(context, Characters.ENEMIES[0])
+                }
+        }
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {

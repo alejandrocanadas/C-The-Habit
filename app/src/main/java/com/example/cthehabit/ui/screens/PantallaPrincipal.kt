@@ -7,6 +7,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -20,6 +21,8 @@ import com.example.cthehabit.ui.AuthViewModel
 import com.example.cthehabit.utils.hasUsageStatsPermission
 import com.example.cthehabit.utils.requestUsagePermission
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.*
@@ -30,7 +33,7 @@ fun PantallaPrincipal(
     authViewModel: AuthViewModel,
     onGraficas24h: () -> Unit,
     onGraficas7d: () -> Unit,
-    onJugarClick: (horas: Int) -> Unit, // <--- se mantiene
+    onJugarClick: (horas: Int) -> Unit,
     onMisionesClick: () -> Unit
 ) {
     val context = LocalContext.current
@@ -43,6 +46,9 @@ fun PantallaPrincipal(
     val prefs = context.getSharedPreferences("sync_prefs", 0)
     var nextSyncTime by remember { mutableStateOf(prefs.getLong("next_sync_time", 0L)) }
     var remainingTime by remember { mutableStateOf("--") }
+
+    // Para el snackbar de confirmación del reinicio
+    var mostrarConfirmacion by remember { mutableStateOf(false) }
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -74,6 +80,38 @@ fun PantallaPrincipal(
             } else "sincronizando..."
             delay(1000)
         }
+    }
+
+    // Diálogo de confirmación antes de reiniciar
+    if (mostrarConfirmacion) {
+        AlertDialog(
+            onDismissRequest = { mostrarConfirmacion = false },
+            title = { Text("¿Reiniciar nivel?") },
+            text = { Text("Tu progreso volverá al nivel 1. ¿Estás seguro?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        mostrarConfirmacion = false
+                        val userId = FirebaseAuth.getInstance().currentUser?.uid
+                        if (userId != null) {
+                            val data = hashMapOf("currentLevel" to 1)
+                            FirebaseFirestore.getInstance()
+                                .collection("users")
+                                .document(userId)
+                                .set(data, SetOptions.merge())
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
+                ) {
+                    Text("Sí, reiniciar", color = Color.White)
+                }
+            },
+            dismissButton = {
+                OutlinedButton(onClick = { mostrarConfirmacion = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
     }
 
     Column(
@@ -108,13 +146,26 @@ fun PantallaPrincipal(
 
             Spacer(Modifier.height(8.dp))
 
-            // --- ÚNICO BOTÓN "JUGAR AHORA" ---
             Button(
-                onClick = { onJugarClick(5) }, // <--- aquí se ejecuta tu callback
+                onClick = { onJugarClick(5) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Jugar ahora")
             }
+
+            Spacer(Modifier.height(6.dp))
+
+            // ── BOTÓN REINICIAR NIVEL ────────────────────────────────────
+            Button(
+                onClick = { mostrarConfirmacion = true },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFD32F2F)
+                )
+            ) {
+                Text("Reiniciar nivel", color = Color.White)
+            }
+            // ────────────────────────────────────────────────────────────
 
             Spacer(Modifier.height(8.dp))
 
