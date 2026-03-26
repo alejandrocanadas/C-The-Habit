@@ -34,7 +34,8 @@ fun PantallaPrincipal(
     onGraficas24h: () -> Unit,
     onGraficas7d: () -> Unit,
     onJugarClick: (horas: Int) -> Unit,
-    onMisionesClick: () -> Unit
+    onMisionesClick: () -> Unit,
+    onTrofeosClick: () -> Unit          // <-- nuevo parámetro
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -46,8 +47,6 @@ fun PantallaPrincipal(
     val prefs = context.getSharedPreferences("sync_prefs", 0)
     var nextSyncTime by remember { mutableStateOf(prefs.getLong("next_sync_time", 0L)) }
     var remainingTime by remember { mutableStateOf("--") }
-
-    // Para el snackbar de confirmación del reinicio
     var mostrarConfirmacion by remember { mutableStateOf(false) }
 
     DisposableEffect(lifecycleOwner) {
@@ -82,7 +81,6 @@ fun PantallaPrincipal(
         }
     }
 
-    // Diálogo de confirmación antes de reiniciar
     if (mostrarConfirmacion) {
         AlertDialog(
             onDismissRequest = { mostrarConfirmacion = false },
@@ -155,17 +153,27 @@ fun PantallaPrincipal(
 
             Spacer(Modifier.height(6.dp))
 
-            // ── BOTÓN REINICIAR NIVEL ────────────────────────────────────
+            // ── SALÓN DE TROFEOS ─────────────────────────────────────────
+            Button(
+                onClick = onTrofeosClick,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFB8860B)
+                )
+            ) {
+                Text("🏆  Salón de Trofeos", color = Color.White)
+            }
+            // ─────────────────────────────────────────────────────────────
+
+            Spacer(Modifier.height(6.dp))
+
             Button(
                 onClick = { mostrarConfirmacion = true },
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFD32F2F)
-                )
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
             ) {
                 Text("Reiniciar nivel", color = Color.White)
             }
-            // ────────────────────────────────────────────────────────────
 
             Spacer(Modifier.height(8.dp))
 

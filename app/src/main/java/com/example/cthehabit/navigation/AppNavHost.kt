@@ -88,7 +88,8 @@ fun AppNavHost(
                 onJugarClick = { horas ->
                     navController.navigate("characterSelect/$horas")
                 },
-                onMisionesClick = { navController.navigate("misiones") }
+                onMisionesClick = { navController.navigate("misiones") } ,
+                onTrofeosClick = { navController.navigate("trofeos") } //
             )
         }
 
@@ -148,6 +149,12 @@ fun AppNavHost(
                         }
                     }
                 }
+            )
+        }
+
+        composable("trofeos") {
+            SalonDeTrofeos(
+                onBack = { navController.popBackStack() }
             )
         }
 
