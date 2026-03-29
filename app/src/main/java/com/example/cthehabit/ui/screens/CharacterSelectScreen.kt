@@ -59,14 +59,8 @@ fun CharacterSelectScreen(horas: Int, onStartGame: (Int, Int) -> Unit) {
         ) {
             itemsIndexed(Characters.PLAYERS) { index, character ->
                 val isSelected = selectedPlayer == index
-
                 val bitmapPreview = remember(character.idleRes) {
-                    decodeAndScaleFrame(
-                        context = context,
-                        resId = character.idleRes,
-                        targetHeight = 400,
-                        frameCount = character.idleFrames
-                    )
+                    decodeAndScaleFrame(context, character.idleRes, 400, character.idleFrames)
                 }
 
                 Column(
@@ -80,8 +74,7 @@ fun CharacterSelectScreen(horas: Int, onStartGame: (Int, Int) -> Unit) {
                             shape = MaterialTheme.shapes.medium
                         )
                         .background(
-                            color = if (isSelected) Color(0xFF4CAF50).copy(alpha = 0.1f)
-                            else Color.Gray.copy(alpha = 0.05f),
+                            color = if (isSelected) Color(0xFF4CAF50).copy(alpha = 0.1f) else Color.Transparent,
                             shape = MaterialTheme.shapes.medium
                         )
                         .clickable { selectedPlayer = index }
@@ -94,32 +87,18 @@ fun CharacterSelectScreen(horas: Int, onStartGame: (Int, Int) -> Unit) {
                         contentDescription = character.name,
                         filterQuality = FilterQuality.None,
                         contentScale = ContentScale.Fit,
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
+                        modifier = Modifier.weight(1f).fillMaxWidth()
                     )
-
-                    Spacer(Modifier.height(8.dp))
-
-                    Text(
-                        text = character.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = if (isSelected) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurface
-                    )
+                    Text(text = character.name, style = MaterialTheme.typography.titleMedium)
                 }
             }
         }
 
-        Spacer(Modifier.height(16.dp))
-
         Button(
             onClick = { onStartGame(selectedPlayer, 0) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .padding(horizontal = 16.dp)
+            modifier = Modifier.fillMaxWidth().height(56.dp).padding(horizontal = 16.dp)
         ) {
-            Text("¡A LUCHAR!", style = MaterialTheme.typography.labelLarge)
+            Text("¡A LUCHAR!")
         }
     }
 }

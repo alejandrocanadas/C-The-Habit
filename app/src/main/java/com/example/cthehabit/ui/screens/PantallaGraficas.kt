@@ -249,7 +249,8 @@ private fun StatCard(
             .clip(RoundedCornerShape(14.dp))
             .background(Surface1)
             .border(1.dp, Border, RoundedCornerShape(14.dp))
-            .padding(horizontal = 12.dp, vertical = 14.dp)
+            // Reducimos padding horizontal de 12 a 8 para ganar espacio
+            .padding(horizontal = 8.dp, vertical = 14.dp)
     ) {
         // Borde superior de acento
         Box(
@@ -263,23 +264,34 @@ private fun StatCard(
                     )
                 )
         )
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Spacer(Modifier.height(6.dp))
             Text(
-                text  = label,
+                text = label,
                 fontSize = 9.sp,
                 color = TextMuted,
                 fontWeight = FontWeight.Medium,
-                letterSpacing = 1.5.sp
+                letterSpacing = 1.2.sp, // Un poco menos de spacing para que no ocupe tanto
+                maxLines = 1
             )
             Spacer(Modifier.height(4.dp))
+
+            // EL CAMBIO ESTÁ AQUÍ:
             Text(
-                text       = value,
-                fontSize   = 18.sp,
+                text = value,
+                fontSize = 16.sp, // Bajamos de 18 a 16 para mayor compatibilidad
                 fontWeight = FontWeight.Bold,
-                color      = TextPrimary,
-                maxLines   = 1,
-                overflow   = TextOverflow.Ellipsis
+                color = TextPrimary,
+                maxLines = 1,
+                // Si el texto es más largo que el espacio, se deslizará solo
+                modifier = Modifier.basicMarquee(
+                    iterations = Int.MAX_VALUE,
+                    initialDelayMillis = 2000,
+                    velocity = 30.dp // Velocidad suave
+                )
             )
         }
     }
@@ -524,15 +536,20 @@ fun NeonLineChart(data: Map<String, Float>, heightDp: Int = 260) {
                     setCircleColor(android.graphics.Color.parseColor("#B57BEE"))
                     circleRadius      = 5f
                     circleHoleRadius  = 2.5f
-                    lineWidth         = 2.5f
-                    valueTextSize     = 10f
-                    valueTextColor    = android.graphics.Color.parseColor("#F0F2FF")
+                    lineWidth          = 2.5f
+
+                    // --- EL CAMBIO CRUCIAL ESTÁ AQUÍ ---
+                    setDrawValues(false) // Esto quita los números (12.1, 0.9, etc.)
+                    // -----------------------------------
+
                     mode              = LineDataSet.Mode.CUBIC_BEZIER
                     setDrawFilled(true)
                     fillAlpha         = 40
                     fillColor         = android.graphics.Color.parseColor("#4FC3F7")
                 }
+
                 this.data = LineData(ds)
+
                 xAxis.apply {
                     valueFormatter  = IndexAxisValueFormatter(labels)
                     position        = com.github.mikephil.charting.components.XAxis.XAxisPosition.BOTTOM
@@ -542,19 +559,22 @@ fun NeonLineChart(data: Map<String, Float>, heightDp: Int = 260) {
                     textSize        = 10f
                     typeface        = android.graphics.Typeface.DEFAULT_BOLD
                 }
+
                 axisLeft.apply {
                     setDrawGridLines(true)
                     gridColor = android.graphics.Color.parseColor("#1E2330")
                     textColor = android.graphics.Color.parseColor("#8892B0")
                     textSize  = 10f
                 }
+
                 axisRight.isEnabled   = false
                 setDrawGridBackground(false)
                 setDrawBorders(false)
                 setBackgroundColor(android.graphics.Color.TRANSPARENT)
                 description.isEnabled = false
                 legend.isEnabled      = false
-                animateX(1000, ChartEasing.EaseInOutSine)            }
+                animateX(1000, ChartEasing.EaseInOutSine)
+            }
         }
     )
 }

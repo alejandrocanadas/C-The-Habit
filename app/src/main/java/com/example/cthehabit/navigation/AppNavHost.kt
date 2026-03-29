@@ -1,50 +1,30 @@
 package com.example.cthehabit.navigation
 
-import android.content.Intent
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.example.cthehabit.ui.AuthViewModel
 import com.example.cthehabit.ui.screens.*
-import com.example.cthehabit.ui.game.GameActivity
-import androidx.compose.runtime.mutableStateOf
-import com.example.cthehabit.data.repositories.FirestoreRepository
-import com.example.cthehabit.utils.Mission
-import com.example.cthehabit.utils.MissionGenerator
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import androidx.compose.runtime.rememberCoroutineScope
-import com.example.cthehabit.utils.MissionMapper
-import com.example.cthehabit.utils.getTodayDate
 import com.example.cthehabit.viewmodels.AppUsageViewModel
-
 
 @Composable
 fun AppNavHost(
     navController: NavHostController,
     authViewModel: AuthViewModel,
-    usageViewModel: AppUsageViewModel // 👈 AÑADIR ESTO
+    usageViewModel: AppUsageViewModel
 ) {
     val startRoute = remember {
         if (authViewModel.isLoggedIn.value) "main" else "Inicio"
     }
 
-    val context = LocalContext.current
-    val generatedMissions = remember { mutableStateOf<List<Mission>>(emptyList()) }
-    val firestoreRepository = remember { FirestoreRepository() }
-    val scope = rememberCoroutineScope()
-
     NavHost(
         navController = navController,
         startDestination = startRoute
     ) {
-
         composable("Inicio") {
             PantallaInicio(
                 onEmpezarClick = { navController.navigate("registro") },
@@ -82,14 +62,12 @@ fun AppNavHost(
             PantallaPrincipal(
                 navController = navController,
                 authViewModel = authViewModel,
-                usageViewModel = usageViewModel, // ✅ FIX
+                usageViewModel = usageViewModel,
                 onGraficas24h = { navController.navigate("graficas/24h") },
                 onGraficas7d = { navController.navigate("graficas/7d") },
-                onJugarClick = { horas ->
-                    navController.navigate("characterSelect/$horas")
-                },
+                onJugarClick = { horas -> navController.navigate("characterSelect/$horas") },
                 onMisionesClick = { navController.navigate("misiones") },
-                onTrofeosClick = { navController.navigate("trofeos") } // ✅ OK
+                onTrofeosClick = { navController.navigate("trofeos") }
             )
         }
 
@@ -99,29 +77,46 @@ fun AppNavHost(
         }
 
         composable("trofeos") {
-            SalonDeTrofeos(
-                onBack = { navController.popBackStack() }
-            )
+            SalonDeTrofeos(onBack = { navController.popBackStack() })
         }
 
         composable("misiones") {
-            PantallaPrincipalMisiones(
-                onBack = { navController.popBackStack() }
-            )
+            PantallaPrincipalMisiones(onBack = { navController.popBackStack() })
         }
 
         composable("characterSelect/{horas}") { backStackEntry ->
             val horas = backStackEntry.arguments?.getString("horas")?.toInt() ?: 0
-
             CharacterSelectScreen(
                 horas = horas,
-                onStartGame = { playerIndex, enemyIndex ->
-                    val intent = Intent(context, GameActivity::class.java).apply {
-                        putExtra("horas_redes", horas)
-                        putExtra("playerIndex", playerIndex)
-                        putExtra("enemyIndex", enemyIndex)
+                onStartGame = { pIdx, eIdx ->
+                    navController.navigate("game/$horas/$pIdx/$eIdx")
+                }
+            )
+        }
+
+        composable(
+            route = "game/{horas}/{player}/{enemy}",
+            arguments = listOf(
+                navArgument("horas") { type = NavType.IntType },
+                navArgument("player") { type = NavType.IntType },
+                navArgument("enemy") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val horas = backStackEntry.arguments?.getInt("horas") ?: 0
+            val player = backStackEntry.arguments?.getInt("player") ?: 0
+            val enemy = backStackEntry.arguments?.getInt("enemy") ?: 0
+
+            GameScreen(
+                horas = horas,
+                playerIndex = player,
+                enemyIndex = enemy,
+                onSiguienteClick = {
+                    navController.navigate("main") {
+                        popUpTo("main") { inclusive = true }
                     }
-                    context.startActivity(intent)
+                },
+                onOpenTrophies = {
+                    navController.navigate("trofeos")
                 }
             )
         }

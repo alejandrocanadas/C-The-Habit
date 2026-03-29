@@ -169,13 +169,6 @@ fun PantallaPrincipal(
             Text("Ver misiones")
         }
 
-        Button(
-            onClick = onTrofeosClick,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB8860B))
-        ) {
-            Text("🏆 Salón de Trofeos", color = Color.White)
-        }
 
         Spacer(Modifier.height(6.dp))
 
