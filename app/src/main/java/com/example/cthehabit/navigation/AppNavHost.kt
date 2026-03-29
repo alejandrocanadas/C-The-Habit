@@ -84,6 +84,10 @@ fun AppNavHost(
             PantallaPrincipalMisiones(onBack = { navController.popBackStack() })
         }
 
+        composable("calendar") {
+            PantallaCalendario()
+        }
+
         composable("characterSelect/{horas}") { backStackEntry ->
             val horas = backStackEntry.arguments?.getString("horas")?.toInt() ?: 0
             CharacterSelectScreen(

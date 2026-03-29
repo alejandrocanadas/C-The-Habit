@@ -172,6 +172,13 @@ fun PantallaPrincipal(
 
         Spacer(Modifier.height(6.dp))
 
+        Button(
+            onClick = { navController.navigate("calendar") },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("📅 Ver calendario")
+        }
+
         Spacer(Modifier.height(12.dp))
         Button(onClick = {
             authViewModel.logout {
