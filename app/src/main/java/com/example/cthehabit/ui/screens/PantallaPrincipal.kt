@@ -173,7 +173,13 @@ fun PantallaPrincipal(
         Spacer(Modifier.height(6.dp))
 
         Spacer(Modifier.height(12.dp))
-        Button(onClick = { FirebaseAuth.getInstance().signOut() }) {
+        Button(onClick = {
+            authViewModel.logout {
+                navController.navigate("login") {
+                    popUpTo(0) { inclusive = true }
+                }
+            }
+        }) {
             Text("Sign Out")
         }
 
