@@ -3,20 +3,20 @@ package com.example.cthehabit.viewmodels
 import android.content.Context
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.example.cthehabit.data.entity.AppUsage
-import com.example.cthehabit.data.repositories.getUsageStats
-import com.example.cthehabit.data.repositories.getUsageStatsLast7Days
+import com.example.cthehabit.data.repositories.getUsageLast24h
+import com.example.cthehabit.data.repositories.getUsageLast7Days
 
 class AppUsageViewModel : ViewModel() {
 
-    var apps = mutableStateOf<List<AppUsage>>(emptyList())
+    // día -> app -> tiempo (ms)
+    var usageData = mutableStateOf<Map<String, Map<String, Long>>>(emptyMap())
         private set
 
     fun loadToday(context: Context) {
-        apps.value = getUsageStats(context)
+        usageData.value = getUsageLast24h(context)
     }
 
     fun loadLast7Days(context: Context) {
-        apps.value = getUsageStatsLast7Days(context)
+        usageData.value = getUsageLast7Days(context)
     }
 }

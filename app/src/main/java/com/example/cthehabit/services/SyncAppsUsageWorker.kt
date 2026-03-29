@@ -7,7 +7,7 @@ import androidx.work.WorkerParameters
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.ExistingPeriodicWorkPolicy
-import com.example.cthehabit.data.repositories.getUsageStats
+import com.example.cthehabit.data.repositories.getUsageLast24h
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
@@ -21,18 +21,20 @@ class SyncAppsUsageWorker(
 
         try {
 
-            val usageStats = getUsageStats(applicationContext)
+            val usageStats = getUsageLast24h(applicationContext)
 
-            usageStats.forEach {
-                Log.d(
-                    "SYNC_WORKER",
-                    "App: ${it.packageName} Tiempo: ${it.timeInForeground}"
-                )
+            usageStats.forEach { (day, apps) ->
+                apps.forEach { (app, time) ->
+                    Log.d(
+                        "SYNC_WORKER",
+                        "Dia: $day | App: $app | Tiempo(ms): $time"
+                    )
+                }
             }
 
             Log.d("SYNC_WORKER", "Sync ejecutado correctamente")
 
-            // actualizar el tiempo del próximo sync
+            // próximo sync
             val nextSync = System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1)
 
             val prefs =
@@ -47,7 +49,6 @@ class SyncAppsUsageWorker(
         } catch (e: Exception) {
 
             Log.e("SYNC_WORKER", "Error en sync", e)
-
             Result.retry()
         }
     }
@@ -70,7 +71,6 @@ class SyncAppsUsageWorker(
                     request
                 )
 
-            // guardar el primer tiempo de sync
             val nextSync = System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1)
 
             val prefs = context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE)

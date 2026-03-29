@@ -10,16 +10,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import com.example.cthehabit.data.entity.AppUsage
-import com.example.cthehabit.data.repositories.getUsageStats
-import com.example.cthehabit.data.repositories.getUsageStatsLast7Days
 import com.example.cthehabit.ui.AuthViewModel
-import com.example.cthehabit.utils.hasUsageStatsPermission
-import com.example.cthehabit.utils.requestUsagePermission
+import com.example.cthehabit.viewmodels.AppUsageViewModel
+import com.example.cthehabit.utils.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
@@ -31,56 +26,43 @@ import java.util.*
 fun PantallaPrincipal(
     navController: NavHostController,
     authViewModel: AuthViewModel,
+    usageViewModel: AppUsageViewModel,
     onGraficas24h: () -> Unit,
     onGraficas7d: () -> Unit,
     onJugarClick: (horas: Int) -> Unit,
     onMisionesClick: () -> Unit,
-    onTrofeosClick: () -> Unit          // <-- nuevo parámetro
+    onTrofeosClick: () -> Unit
 ) {
+
     val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
 
     var tienePermiso by remember { mutableStateOf(hasUsageStatsPermission(context)) }
-    var apps by remember { mutableStateOf(listOf<AppUsage>()) }
     var modoSieteDias by remember { mutableStateOf(false) }
+
+    val usageData by remember { usageViewModel.usageData }
 
     val prefs = context.getSharedPreferences("sync_prefs", 0)
     var nextSyncTime by remember { mutableStateOf(prefs.getLong("next_sync_time", 0L)) }
     var remainingTime by remember { mutableStateOf("--") }
     var mostrarConfirmacion by remember { mutableStateOf(false) }
 
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                tienePermiso = hasUsageStatsPermission(context)
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-    }
-
-    LaunchedEffect(Unit) {
-        if (tienePermiso) {
-            authViewModel.saveUsageEvent(
-                context = context,
-                onSuccess = { },
-                onError = { }
-            )
-        }
-    }
-
+    // ⏱ contador sync
     LaunchedEffect(nextSyncTime) {
         while (true) {
-            val now = System.currentTimeMillis()
-            val diff = nextSyncTime - now
-            remainingTime = if (diff > 0) {
-                val minutes = diff / 60000
-                "$minutes min"
-            } else "sincronizando..."
+            val diff = nextSyncTime - System.currentTimeMillis()
+            remainingTime = if (diff > 0) "${diff / 60000} min" else "sincronizando..."
             delay(1000)
         }
     }
 
+    // 🔐 guardar evento
+    LaunchedEffect(tienePermiso) {
+        if (tienePermiso) {
+            authViewModel.saveUsageEvent(context, {}, {})
+        }
+    }
+
+    // 🔴 diálogo reinicio
     if (mostrarConfirmacion) {
         AlertDialog(
             onDismissRequest = { mostrarConfirmacion = false },
@@ -91,18 +73,15 @@ fun PantallaPrincipal(
                     onClick = {
                         mostrarConfirmacion = false
                         val userId = FirebaseAuth.getInstance().currentUser?.uid
-                        if (userId != null) {
-                            val data = hashMapOf("currentLevel" to 1)
+                        userId?.let {
                             FirebaseFirestore.getInstance()
                                 .collection("users")
-                                .document(userId)
-                                .set(data, SetOptions.merge())
+                                .document(it)
+                                .set(mapOf("currentLevel" to 1), SetOptions.merge())
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
-                ) {
-                    Text("Sí, reiniciar", color = Color.White)
-                }
+                ) { Text("Sí, reiniciar", color = Color.White) }
             },
             dismissButton = {
                 OutlinedButton(onClick = { mostrarConfirmacion = false }) {
@@ -113,139 +92,159 @@ fun PantallaPrincipal(
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
+        modifier = Modifier.fillMaxSize().padding(16.dp)
     ) {
+
         if (!tienePermiso) {
-            Text("Debes conceder permiso de uso para obtener métricas")
+            Text("Debes conceder permiso de uso")
             Spacer(Modifier.height(8.dp))
             Button(onClick = { requestUsagePermission(context) }) {
                 Text("Conceder permiso")
             }
-        } else {
-            Text(
-                text = "Siguiente sync en: $remainingTime",
-                style = MaterialTheme.typography.titleMedium
-            )
-            Spacer(Modifier.height(12.dp))
+            return@Column
+        }
 
-            Button(onClick = {
-                apps = getUsageStats(context)
+        Text("Siguiente sync en: $remainingTime")
+        Spacer(Modifier.height(12.dp))
+
+        Button(
+            onClick = {
+                usageViewModel.loadToday(context)
                 modoSieteDias = false
-            }, modifier = Modifier.fillMaxWidth()) { Text("Obtener métricas (24h)") }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) { Text("Métricas 24h") }
 
-            Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.height(6.dp))
 
-            Button(onClick = {
-                apps = getUsageStatsLast7Days(context)
+        Button(
+            onClick = {
+                usageViewModel.loadLast7Days(context)
                 modoSieteDias = true
-            }, modifier = Modifier.fillMaxWidth()) { Text("Obtener métricas últimos 7 días") }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) { Text("Últimos 7 días") }
 
-            Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(8.dp))
 
-            Button(
-                onClick = { onJugarClick(5) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Jugar ahora")
+        Button(onClick = { onJugarClick(5) }, modifier = Modifier.fillMaxWidth()) {
+            Text("Jugar ahora")
+        }
+
+        Spacer(Modifier.height(6.dp))
+
+        Button(
+            onClick = onTrofeosClick,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB8860B))
+        ) {
+            Text("🏆 Salón de Trofeos", color = Color.White)
+        }
+
+        Spacer(Modifier.height(6.dp))
+
+        Button(
+            onClick = { mostrarConfirmacion = true },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
+        ) {
+            Text("Reiniciar nivel", color = Color.White)
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        if (usageData.isNotEmpty() && !modoSieteDias) {
+            Button(onClick = onGraficas24h, modifier = Modifier.fillMaxWidth()) {
+                Text("Ver gráficas 24h")
             }
+        }
 
-            Spacer(Modifier.height(6.dp))
-
-            // ── SALÓN DE TROFEOS ─────────────────────────────────────────
-            Button(
-                onClick = onTrofeosClick,
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFB8860B)
-                )
-            ) {
-                Text("🏆  Salón de Trofeos", color = Color.White)
+        if (usageData.isNotEmpty() && modoSieteDias) {
+            Button(onClick = onGraficas7d, modifier = Modifier.fillMaxWidth()) {
+                Text("Ver gráficas 7 días")
             }
-            // ─────────────────────────────────────────────────────────────
+        }
 
-            Spacer(Modifier.height(6.dp))
+        Button(onClick = onMisionesClick, modifier = Modifier.fillMaxWidth()) {
+            Text("Ver misiones")
+        }
 
-            Button(
-                onClick = { mostrarConfirmacion = true },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
-            ) {
-                Text("Reiniciar nivel", color = Color.White)
-            }
+        Button(
+            onClick = onTrofeosClick,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB8860B))
+        ) {
+            Text("🏆 Salón de Trofeos", color = Color.White)
+        }
 
-            Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(6.dp))
 
-            if (apps.isNotEmpty() && !modoSieteDias) {
-                Button(onClick = onGraficas24h, modifier = Modifier.fillMaxWidth()) {
-                    Text("Ver gráficas 24h")
+        Spacer(Modifier.height(12.dp))
+        Button(onClick = { FirebaseAuth.getInstance().signOut() }) {
+            Text("Sign Out")
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        // 📊 PROCESAMIENTO LIMPIO
+        val minutesData = mapToMinutes(usageData)
+
+        // ordenar fechas correctamente
+        val sortedDays = minutesData.keys.sortedWith(compareBy {
+            val parts = it.split("/")
+            val day = parts[0].toInt()
+            val month = parts[1].toInt()
+            month * 100 + day
+        }).reversed()
+
+        LazyColumn {
+            sortedDays.forEach { day ->
+
+                item {
+                    Text(
+                        text = formatDay(day),
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
                 }
-            }
 
-            if (apps.isNotEmpty() && modoSieteDias) {
-                Button(onClick = onGraficas7d, modifier = Modifier.fillMaxWidth()) {
-                    Text("Ver gráficas 7 días")
-                }
-            }
+                val apps = minutesData[day] ?: emptyMap()
 
-            Button(
-                onClick = onMisionesClick,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Ver misiones")
-            }
+                items(apps.entries.sortedByDescending { it.value }) { (app, minutes) ->
 
-            Spacer(Modifier.height(12.dp))
-            Button(onClick = { FirebaseAuth.getInstance().signOut() }) { Text("Sign Out") }
-
-            val headerFormat = SimpleDateFormat("d 'de' MMMM", Locale("es", "ES"))
-            val filteredApps = apps.mapNotNull { app ->
-                val name = getSocialAppName(app.packageName)
-                if (name != null) app.copy(packageName = name) else null
-            }
-            val groupedApps = filteredApps
-                .filter { it.lastTimeUsed > 0L }
-                .groupBy { app ->
-                    val cal = Calendar.getInstance()
-                    cal.timeInMillis = app.lastTimeUsed
-                    cal.set(Calendar.HOUR_OF_DAY, 0)
-                    cal.set(Calendar.MINUTE, 0)
-                    cal.set(Calendar.SECOND, 0)
-                    cal.set(Calendar.MILLISECOND, 0)
-                    cal.timeInMillis
-                }.toSortedMap(compareByDescending { it })
-
-            LazyColumn {
-                groupedApps.forEach { (dayKey, appsForDay) ->
-                    item {
-                        Text(
-                            headerFormat.format(Date(dayKey)),
-                            style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
-                    }
-                    items(appsForDay.sortedByDescending { it.timeInForeground }) { app ->
-                        val minutes = app.timeInForeground / 1000 / 60
-                        Card(
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                            elevation = CardDefaults.cardElevation(4.dp)
+                    Card(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                        elevation = CardDefaults.cardElevation(4.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(12.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(app.packageName)
-                                Text("$minutes min")
-                            }
+                            Text(getSocialAppName(app) ?: app)
+                            Text("${minutes.toInt()} min")
                         }
                     }
-                    item { Spacer(Modifier.height(8.dp)) }
                 }
+
+                item { Spacer(Modifier.height(8.dp)) }
             }
         }
     }
+}
+
+fun formatDay(key: String): String {
+    val parts = key.split("/")
+    val day = parts[0].toInt()
+    val month = parts[1].toInt()
+
+    val calendar = Calendar.getInstance().apply {
+        set(Calendar.DAY_OF_MONTH, day)
+        set(Calendar.MONTH, month - 1)
+    }
+
+    val format = SimpleDateFormat("d 'de' MMMM", Locale("es", "ES"))
+    return format.format(calendar.time)
 }
 
 fun getSocialAppName(packageName: String): String? {

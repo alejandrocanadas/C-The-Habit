@@ -1,39 +1,45 @@
 package com.example.cthehabit.utils
 
-import com.example.cthehabit.data.entity.AppUsage
-import java.util.*
+/**
+ * Convierte ms → minutos por día y app
+ */
+fun mapToMinutes(
+    data: Map<String, Map<String, Long>>
+): Map<String, Map<String, Float>> {
 
-fun getUsageByApp(apps: List<AppUsage>): Map<String, Float> {
-
-    val map = mutableMapOf<String, Long>()
-
-    apps.forEach { app ->
-        map[app.packageName] =
-            (map[app.packageName] ?: 0) + app.timeInForeground
-    }
-
-    return map.mapValues {
-        (it.value / 1000f / 60f)
+    return data.mapValues { (_, apps) ->
+        apps.mapValues { it.value / 1000f / 60f }
     }
 }
 
-fun getDailyUsage(apps: List<AppUsage>): Map<String, Float> {
+/**
+ * Total de uso por app (sumando todos los días)
+ */
+fun getUsageByApp(
+    data: Map<String, Map<String, Long>>
+): Map<String, Float> {
 
-    val calendar = Calendar.getInstance()
+    val result = mutableMapOf<String, Long>()
 
-    val map = mutableMapOf<String, Long>()
-
-    apps.forEach {
-
-        calendar.timeInMillis = it.lastTimeUsed
-        val key =
-            "${calendar.get(Calendar.DAY_OF_MONTH)}/${calendar.get(Calendar.MONTH)+1}"
-
-        map[key] =
-            (map[key] ?: 0) + it.timeInForeground
+    data.forEach { (_, apps) ->
+        apps.forEach { (app, time) ->
+            result[app] = (result[app] ?: 0L) + time
+        }
     }
 
-    return map.mapValues {
+    return result.mapValues {
         it.value / 1000f / 60f
+    }
+}
+
+/**
+ * Total de uso por día (para gráficas)
+ */
+fun getTotalUsagePerDay(
+    data: Map<String, Map<String, Long>>
+): Map<String, Float> {
+
+    return data.mapValues { (_, apps) ->
+        apps.values.sum() / 1000f / 60f
     }
 }

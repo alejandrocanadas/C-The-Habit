@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.cthehabit.data.local.SessionManager
 import com.example.cthehabit.data.repositories.FirestoreRepository
-import com.example.cthehabit.data.repositories.getUsageStats
+import com.example.cthehabit.data.repositories.getUsageLast24h
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,8 +19,8 @@ import java.time.LocalDate
 
 class AuthViewModel(
     private val sessionManager: SessionManager,
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance(), // ← coma que faltaba
-    private val firestoreRepo: FirestoreRepository = FirestoreRepository() // ← val en lugar de =
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
+    private val firestoreRepo: FirestoreRepository = FirestoreRepository()
 ) : ViewModel() {
 
     private val _isLoggedIn = MutableStateFlow(auth.currentUser != null)
@@ -32,7 +32,7 @@ class AuthViewModel(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
-    // 🔹 Login — sin cambios
+    // 🔹 Login
     fun login(
         email: String,
         password: String,
@@ -59,7 +59,7 @@ class AuthViewModel(
         }
     }
 
-    // 🔹 Registro — sin cambios
+    // 🔹 Registro
     fun register(
         email: String,
         password: String,
@@ -86,7 +86,7 @@ class AuthViewModel(
         }
     }
 
-    // 🔹 Logout — sin cambios
+    // 🔹 Logout
     fun logout(onComplete: () -> Unit = {}) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -99,14 +99,13 @@ class AuthViewModel(
     }
 
     // 🔹 Guardar cuestionario
-    // Convierte Map<Int, List<String>> a Map<String, List<String>> para Firestore
     fun saveQuestionnaire(
         answers: Map<Int, List<String>>,
         onSuccess: () -> Unit,
         onError: (String) -> Unit
     ) {
         viewModelScope.launch {
-            val firestoreAnswers = answers.mapKeys { "q${it.key}" } // {"q0": [...], "q1": [...]}
+            val firestoreAnswers = answers.mapKeys { "q${it.key}" }
             firestoreRepo.saveQuestionnaire(firestoreAnswers)
                 .onSuccess { onSuccess() }
                 .onFailure { onError(it.message ?: "Error al guardar") }
@@ -120,20 +119,33 @@ class AuthViewModel(
         onError: (String) -> Unit = {}
     ) {
         viewModelScope.launch {
-            val usageList = withContext(Dispatchers.IO) {
-                getUsageStats(context)
-            }
-            val usageMap = usageList.associate { it.packageName to it.timeInForeground }
-            val today = LocalDate.now().toString()
+            try {
+                val usageList = withContext(Dispatchers.IO) {
+                    // ⚡ aquí cambiamos getUsageStats por tu función correcta
+                    getUsageLast24h(context)
+                }
 
-            firestoreRepo.saveUsageEvent(today, usageMap)
-                .onSuccess { onSuccess() }
-                .onFailure { onError(it.message ?: "Error al guardar uso") }
+                // Convertir Map<String, Map<String, Long>> a Map<String, Long> sumando uso por app
+                val usageMap = usageList.values.fold(mutableMapOf<String, Long>()) { acc, dayMap ->
+                    dayMap.forEach { (pkg, duration) ->
+                        acc[pkg] = (acc[pkg] ?: 0L) + duration
+                    }
+                    acc
+                }
+
+                val today = LocalDate.now().toString()
+                firestoreRepo.saveUsageEvent(today, usageMap.mapValues { it.value })
+                    .onSuccess { onSuccess() }
+                    .onFailure { onError(it.message ?: "Error al guardar uso") }
+
+            } catch (e: Exception) {
+                onError(e.message ?: "Error al obtener uso de apps")
+            }
         }
     }
 }
 
-// 🔹 Factory — sin cambios
+// 🔹 Factory
 class AuthViewModelFactory(private val sessionManager: SessionManager) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(AuthViewModel::class.java)) {

@@ -22,20 +22,20 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
 import com.example.cthehabit.utils.MissionMapper
 import com.example.cthehabit.utils.getTodayDate
+import com.example.cthehabit.viewmodels.AppUsageViewModel
 
 
 @Composable
 fun AppNavHost(
     navController: NavHostController,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    usageViewModel: AppUsageViewModel // 👈 AÑADIR ESTO
 ) {
-    val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
     val startRoute = remember {
         if (authViewModel.isLoggedIn.value) "main" else "Inicio"
     }
 
     val context = LocalContext.current
-
     val generatedMissions = remember { mutableStateOf<List<Mission>>(emptyList()) }
     val firestoreRepository = remember { FirestoreRepository() }
     val scope = rememberCoroutineScope()
@@ -82,74 +82,20 @@ fun AppNavHost(
             PantallaPrincipal(
                 navController = navController,
                 authViewModel = authViewModel,
+                usageViewModel = usageViewModel, // ✅ FIX
                 onGraficas24h = { navController.navigate("graficas/24h") },
                 onGraficas7d = { navController.navigate("graficas/7d") },
-                // NUEVO: ir a seleccionar personaje
                 onJugarClick = { horas ->
                     navController.navigate("characterSelect/$horas")
                 },
-                onMisionesClick = { navController.navigate("misiones") } ,
-                onTrofeosClick = { navController.navigate("trofeos") } //
+                onMisionesClick = { navController.navigate("misiones") },
+                onTrofeosClick = { navController.navigate("trofeos") } // ✅ OK
             )
         }
 
         composable("graficas/{tipo}") { backStackEntry ->
             val tipo = backStackEntry.arguments?.getString("tipo") ?: "24h"
             PantallaGraficas(tipo = tipo)
-        }
-
-        composable("encuesta") {
-            PantallaInicialEncuesta(onContinuar = { navController.navigate("preguntas") })
-        }
-
-        composable("preguntas") {
-            PantallaPreguntas(
-                onFinish = { respuestas ->
-
-                    val questionnaireMap = mapOf(
-                        "q1" to (respuestas[0] ?: emptyList()),
-                        "q2" to (respuestas[1] ?: emptyList()),
-                        "q3" to (respuestas[2] ?: emptyList())
-                    )
-
-                    val hoursAnswer = questionnaireMap["q1"]?.firstOrNull().orEmpty()
-                    val momentAnswer = questionnaireMap["q2"]?.firstOrNull().orEmpty()
-                    val selectedActivities = questionnaireMap["q3"] ?: emptyList()
-
-                    generatedMissions.value = MissionGenerator.generateMissions(
-                        hoursAnswer = hoursAnswer,
-                        momentAnswer = momentAnswer,
-                        selectedActivities = selectedActivities
-                    )
-
-                    scope.launch {
-                        firestoreRepository.saveQuestionnaire(questionnaireMap)
-                    }
-
-                    navController.navigate("misiones_iniciales")
-                }
-            )
-        }
-
-        composable("misiones_iniciales") {
-            PantallaInicialMisiones(
-                missions = generatedMissions.value,
-                onContinuar = {
-                    scope.launch {
-                        val today = getTodayDate()
-                        val missionsToSave = MissionMapper.toUserMissions(
-                            missions = generatedMissions.value,
-                            dateAssigned = today
-                        )
-
-                        firestoreRepository.saveMissions(missionsToSave)
-
-                        navController.navigate("main") {
-                            popUpTo("encuesta") { inclusive = true }
-                        }
-                    }
-                }
-            )
         }
 
         composable("trofeos") {
@@ -164,39 +110,18 @@ fun AppNavHost(
             )
         }
 
-        // --- Selección de personaje ---
         composable("characterSelect/{horas}") { backStackEntry ->
             val horas = backStackEntry.arguments?.getString("horas")?.toInt() ?: 0
+
             CharacterSelectScreen(
                 horas = horas,
                 onStartGame = { playerIndex, enemyIndex ->
-                    // Abrir GameActivity pasando player y enemy seleccionados
                     val intent = Intent(context, GameActivity::class.java).apply {
                         putExtra("horas_redes", horas)
                         putExtra("playerIndex", playerIndex)
                         putExtra("enemyIndex", enemyIndex)
                     }
                     context.startActivity(intent)
-                }
-            )
-        }
-
-        // --- Ruta de GameScreen (opcional si quieres mantener algo de Compose) ---
-        composable(
-            route = "game/{horas}/{playerIndex}/{enemyIndex}"
-        ) { backStackEntry ->
-            val horas = backStackEntry.arguments?.getString("horas")?.toInt() ?: 0
-            val playerIndex = backStackEntry.arguments?.getString("playerIndex")?.toInt() ?: 0
-            val enemyIndex = backStackEntry.arguments?.getString("enemyIndex")?.toInt() ?: 0
-
-            GameScreen(
-                horas = horas,
-                playerIndex = playerIndex,
-                enemyIndex = enemyIndex,
-                onSiguienteClick = {
-                    navController.navigate("main") {
-                        popUpTo("main") { inclusive = true }
-                    }
                 }
             )
         }

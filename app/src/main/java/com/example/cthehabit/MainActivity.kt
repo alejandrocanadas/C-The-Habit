@@ -20,21 +20,29 @@ import com.example.cthehabit.ui.AuthViewModel
 import com.example.cthehabit.ui.AuthViewModelFactory
 import com.example.cthehabit.ui.theme.CTheHabitTheme
 import com.example.cthehabit.services.SyncAppsUsageWorker
+import com.example.cthehabit.viewmodels.AppUsageViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Programar el worker que sincroniza el uso de apps
         SyncAppsUsageWorker.schedule(this)
+
+        // Activar modo edge-to-edge
         enableEdgeToEdge()
 
+        // Instanciar SessionManager y AuthViewModelFactory
         val sessionManager = SessionManager(this)
-        val factory = AuthViewModelFactory(sessionManager)
+        val authFactory = AuthViewModelFactory(sessionManager)
 
         setContent {
             CTheHabitTheme {
                 val navController = rememberNavController()
-                val authViewModel: AuthViewModel = viewModel(factory = factory)
+
+                // Instanciar viewmodels
+                val authViewModel: AuthViewModel = viewModel(factory = authFactory)
+                val usageViewModel: AppUsageViewModel = viewModel() // ✅ agregado
 
                 val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
 
@@ -44,9 +52,11 @@ class MainActivity : ComponentActivity() {
                             // Loading inicial mientras revisamos token
                             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                         } else {
+                            // Pasamos ambos viewmodels al NavHost
                             AppNavHost(
                                 navController = navController,
-                                authViewModel = authViewModel
+                                authViewModel = authViewModel,
+                                usageViewModel = usageViewModel // ✅ FIX
                             )
                         }
                     }
