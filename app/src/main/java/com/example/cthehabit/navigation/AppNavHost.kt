@@ -38,7 +38,7 @@ fun AppNavHost(
                 onBack = { navController.popBackStack() },
                 onLogin = { navController.navigate("login") },
                 onRegistroExitoso = {
-                    navController.navigate("encuesta") {
+                    navController.navigate("main") {
                         popUpTo("Inicio") { inclusive = true }
                     }
                 }
@@ -58,36 +58,23 @@ fun AppNavHost(
             )
         }
 
+        // --- EL CONTENEDOR CON BOTTOM BAR ---
         composable("main") {
-            PantallaPrincipal(
-                navController = navController,
+            BottomNavScreen(
                 authViewModel = authViewModel,
                 usageViewModel = usageViewModel,
-                onGraficas24h = { navController.navigate("graficas/24h") },
-                onGraficas7d = { navController.navigate("graficas/7d") },
-                onJugarClick = { horas -> navController.navigate("characterSelect/$horas") },
-                onMisionesClick = { navController.navigate("misiones") },
-                onTrofeosClick = { navController.navigate("trofeos") }
+                onJugarClick = { horas ->
+                    navController.navigate("characterSelect/$horas")
+                },
+                onLogout = {
+                    navController.navigate("login") {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
             )
         }
 
-        composable("graficas/{tipo}") { backStackEntry ->
-            val tipo = backStackEntry.arguments?.getString("tipo") ?: "24h"
-            PantallaGraficas(tipo = tipo)
-        }
-
-        composable("trofeos") {
-            SalonDeTrofeos(onBack = { navController.popBackStack() })
-        }
-
-        composable("misiones") {
-            PantallaPrincipalMisiones(onBack = { navController.popBackStack() })
-        }
-
-        composable("calendar") {
-            PantallaCalendario()
-        }
-
+        // --- PANTALLAS DE JUEGO (PANTALLA COMPLETA FUERA DEL BOTTOM BAR) ---
         composable("characterSelect/{horas}") { backStackEntry ->
             val horas = backStackEntry.arguments?.getString("horas")?.toInt() ?: 0
             CharacterSelectScreen(
@@ -120,7 +107,7 @@ fun AppNavHost(
                     }
                 },
                 onOpenTrophies = {
-                    navController.navigate("trofeos")
+                    navController.navigate("main") // Vuelve al main donde están los trofeos
                 }
             )
         }
