@@ -18,7 +18,7 @@ class GameView(
     private val horas: Int,
     playerIndex: Int,
     private var enemyIndex: Int,
-    private var nivelInicial: Int // Recibimos el nivel cargado de Firebase
+    private var nivelInicial: Int
 ) : SurfaceView(context), Runnable {
 
     private var thread: Thread? = null
@@ -26,9 +26,11 @@ class GameView(
     private var canvas: Canvas? = null
     private val scale = 1.8f
 
-    // Firebase
     private val db = FirebaseFirestore.getInstance()
     private val userId = FirebaseAuth.getInstance().currentUser?.uid
+
+    private var nivel = nivelInicial
+    private var xpActual = 0
 
     private val backgroundBitmap: Bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.zfall_night)
     private val player = Character(context, Characters.PLAYERS[playerIndex])
@@ -44,8 +46,7 @@ class GameView(
     private val skeletonSpeed = 5f
 
     private var knightHealth = 3
-    private var nivel = nivelInicial // Usamos el nivel que vino de Firebase
-    private var enemyHealth = nivel  // La vida del enemigo escala con ese nivel
+    private var enemyHealth = nivel
     private var vidas = 3
 
     private val attackDistance = 150f
@@ -59,22 +60,30 @@ class GameView(
 
     init {
         post { resetPositions() }
+        fetchUserData()
     }
 
-    private fun resetPositions() {
-        val sueloY = (height / 2f) * 0.62f
-        player.x = 100f
-        player.y = sueloY
-        enemy.x = width - 400f
-        enemy.y = sueloY
+    private fun obtenerXpNecesariaParaSiguienteNivel(): Int {
+        return 150 + ((nivel - 1) * 100)
     }
 
-    // Función para guardar progreso sin borrar lo de tus amigos (merge)
-    private fun saveLevelToFirebase() {
+    private fun fetchUserData() {
         if (userId != null) {
-            val data = hashMapOf("currentLevel" to nivel)
-            db.collection("users").document(userId)
-                .set(data, SetOptions.merge()) // El merge protege tus otras subcolecciones
+            db.collection("users").document(userId).get()
+                .addOnSuccessListener { document ->
+                    if (document != null && document.exists()) {
+                        nivel = document.getLong("currentLevel")?.toInt() ?: nivelInicial
+                        xpActual = document.getLong("xp")?.toInt() ?: 0
+                        enemyHealth = nivel
+                    }
+                }
+        }
+    }
+
+    private fun saveProgressToFirebase() {
+        if (userId != null) {
+            val data = hashMapOf("currentLevel" to nivel, "xp" to xpActual)
+            db.collection("users").document(userId).set(data, SetOptions.merge())
         }
     }
 
@@ -83,46 +92,26 @@ class GameView(
             if (!holder.surface.isValid) continue
             val now = System.currentTimeMillis()
 
-            // IA Enemigo
-            if (enemy.state != "death" && enemy.state != "hurt" && knightHealth > 0) {
-                val direction = if (enemy.x > player.x) -1 else 1
-                enemy.x += direction * skeletonSpeed
-                if (abs(enemy.x - player.x) < attackDistance && now - lastSkeletonAttackTime >= skeletonAttackInterval) {
-                    enemy.state = "attack"
-                    enemy.frame = 0
-                    enemyHasHit = false
-                    lastSkeletonAttackTime = now
-                } else if (enemy.state != "attack") {
-                    enemy.state = "walk"
-                }
-            }
+            actualizarIA(now)
 
-            // Loop Infinito
             if (player.x > width) player.x = -50f
             if (player.x < -100f) player.x = width.toFloat()
-            if (enemy.x > width) enemy.x = -50f
-            if (enemy.x < -100f) enemy.x = width.toFloat()
 
-            // --- RESPAWN ENEMIGO (Aquí sube nivel y guardamos) ---
             if (enemyHealth <= 0 && now >= respawnTimeEnemy) {
-                nivel++
-                enemyHealth = nivel
+                val xpMeta = obtenerXpNecesariaParaSiguienteNivel()
 
-                saveLevelToFirebase() // <--- GUARDADO AUTOMÁTICO
+                if (xpActual >= xpMeta) {
+                    xpActual -= xpMeta // Se resta lo consumido, reiniciando la barra
+                    nivel++
+                    saveProgressToFirebase()
+                }
 
-                val nuevoIndice = ((nivel - 1) / 3) % Characters.ENEMIES.size
-                enemy = Character(context, Characters.ENEMIES[nuevoIndice])
-                enemy.state = "idle"
-                enemy.frame = 0
-                enemy.y = (height / 2f) * 0.62f
-                enemy.x = if (player.x < width / 2) width - 100f else 100f
+                resetEnemigo()
             }
 
-            // Respawn Jugador
             if (knightHealth <= 0 && now >= respawnTimeKnight) {
                 knightHealth = 3
                 player.state = "idle"
-                player.frame = 0
                 resetPositions()
             }
 
@@ -135,20 +124,86 @@ class GameView(
         }
     }
 
+    private fun resetEnemigo() {
+        enemyHealth = nivel
+        val nuevoIndice = ((nivel - 1) / 3) % Characters.ENEMIES.size
+        enemy = Character(context, Characters.ENEMIES[nuevoIndice])
+        enemy.y = (height / 2f) * 0.62f
+        enemy.x = if (player.x < width / 2) width - 100f else 100f
+    }
+
     private fun drawGame() {
-        canvas?.drawColor(Color.WHITE)
-        val mitadAltura = height / 2
-        val destRect = Rect(0, 0, width, mitadAltura)
-        canvas?.drawBitmap(backgroundBitmap, null, destRect, null)
+        canvas?.let { c ->
+            c.drawColor(Color.WHITE) // Fondo blanco de la SurfaceView
+            val mitadAltura = height / 2
+            val destRect = Rect(0, 0, width, mitadAltura)
+            // Fondo del juego (la imagen nocturna)
+            c.drawBitmap(backgroundBitmap, null, destRect, null)
 
-        if (player.state == "death") {
-            if (player.frame < player.currentFrameCount() - 1) player.update()
-        } else player.update()
+            player.update()
+            enemy.update()
+            actualizarMovimientoJugador()
+            actualizarCombate()
 
-        if (enemy.state == "death") {
-            if (enemy.frame < enemy.currentFrameCount() - 1) enemy.update()
-        } else enemy.update()
+            player.draw(c, scale)
+            enemy.draw(c, scale)
 
+            dibujarHUD(c)
+        }
+    }
+
+    private fun dibujarHUD(c: Canvas) {
+        val paint = Paint().apply {
+            color = Color.WHITE
+            textSize = 40f
+            isFakeBoldText = true
+            setShadowLayer(8f, 0f, 0f, Color.BLACK) // Sombra para legibilidad sobre el fondo
+        }
+
+        val xpMeta = obtenerXpNecesariaParaSiguienteNivel()
+
+        c.drawText("Nivel Usuario: $nivel", 50f, 70f, paint)
+
+        val barraAnchoTotal = 300f
+        val xInicio = 50f
+        val yInicio = 100f // Debajo del nivel
+        val altoBarra = 15f
+
+        paint.color = Color.parseColor("#333333")
+        paint.clearShadowLayer()
+        c.drawRect(xInicio, yInicio, xInicio + barraAnchoTotal, yInicio + altoBarra, paint)
+
+
+        val porcentaje = (xpActual.toFloat() / xpMeta.toFloat()).coerceAtMost(1f)
+        paint.color = Color.WHITE // Blanco puro
+        c.drawRect(xInicio, yInicio, xInicio + (barraAnchoTotal * porcentaje), yInicio + altoBarra, paint)
+
+        paint.color = Color.WHITE
+        paint.textSize = 30f
+        paint.setShadowLayer(8f, 0f, 0f, Color.BLACK) // Recuperamos sombra para el texto
+        c.drawText("$xpActual / $xpMeta XP", xInicio, yInicio + altoBarra + 35f, paint)
+
+        paint.textSize = 40f
+        c.drawText("Salud: $knightHealth/3", 50f, yInicio + altoBarra + 90f, paint)
+
+        if (enemyHealth > 0) {
+            paint.color = Color.RED
+            c.drawText("Jefe HP: $enemyHealth", width - 350f, 70f, paint)
+        }
+    }
+
+    private fun actualizarIA(now: Long) {
+        if (enemy.state != "death" && enemy.state != "hurt" && knightHealth > 0) {
+            val direction = if (enemy.x > player.x) -1 else 1
+            enemy.x += direction * skeletonSpeed
+            if (abs(enemy.x - player.x) < attackDistance && now - lastSkeletonAttackTime >= skeletonAttackInterval) {
+                enemy.state = "attack"; enemy.frame = 0; enemyHasHit = false
+                lastSkeletonAttackTime = now
+            } else if (enemy.state != "attack") enemy.state = "walk"
+        }
+    }
+
+    private fun actualizarMovimientoJugador() {
         if (knightHealth > 0 && player.state != "hurt") {
             if (movingLeft) player.x -= moveSpeed
             if (movingRight) player.x += moveSpeed
@@ -158,122 +213,52 @@ class GameView(
                 else -> "idle"
             }
         }
+    }
 
+    private fun actualizarCombate() {
         if (attacking && !hasHit && player.frame == player.currentFrameCount() / 2) {
-            if (abs(player.x - enemy.x) < attackDistance && enemyHealth > 0 && enemy.state != "death") {
-                enemyHealth--
-                hasHit = true
+            if (abs(player.x - enemy.x) < attackDistance && enemyHealth > 0) {
+                enemyHealth--; hasHit = true
                 if (enemyHealth <= 0) {
                     enemy.state = "death"
-                    enemy.frame = 0
                     respawnTimeEnemy = System.currentTimeMillis() + respawnDelayEnemy
-                } else {
-                    enemy.state = "hurt"
-                    enemy.frame = 0
-                }
+                } else { enemy.state = "hurt"; enemy.frame = 0 }
             }
         }
-        if (attacking && player.frame >= player.currentFrameCount() - 1) {
-            attacking = false
-            hasHit = false
-        }
-
+        if (attacking && player.frame >= player.currentFrameCount() - 1) { attacking = false; hasHit = false }
         if (enemy.state == "attack" && !enemyHasHit && enemy.frame == enemy.currentFrameCount() / 2) {
-            if (abs(player.x - enemy.x) < 100 && knightHealth > 0 && player.state != "death") {
-                knightHealth--
-                enemyHasHit = true
-                if (knightHealth <= 0) {
-                    player.state = "death"
-                    player.frame = 0
-                    vidas--
-                    respawnTimeKnight = System.currentTimeMillis() + respawnDelay
-                } else {
-                    player.state = "hurt"
-                    player.frame = 0
-                }
+            if (abs(player.x - enemy.x) < 100 && knightHealth > 0) {
+                knightHealth--; enemyHasHit = true
+                player.state = if (knightHealth <= 0) "death" else "hurt"
+                if (knightHealth <= 0) respawnTimeKnight = System.currentTimeMillis() + respawnDelay
             }
         }
-
         if (player.state == "hurt" && player.frame >= player.currentFrameCount() - 1) player.state = "idle"
         if (enemy.state == "hurt" && enemy.frame >= enemy.currentFrameCount() - 1) enemy.state = "walk"
         if (enemy.state == "attack" && enemy.frame >= enemy.currentFrameCount() - 1) enemy.state = "walk"
-
-        player.draw(canvas!!, scale)
-        enemy.draw(canvas!!, scale)
-
-        val paint = Paint().apply {
-            color = Color.WHITE
-            textSize = 45f
-            isFakeBoldText = true
-            setShadowLayer(10f, 0f, 0f, Color.BLACK)
-        }
-        canvas?.drawText("Nivel: $nivel", 40f, 70f, paint)
-        canvas?.drawText("Tus Toques: $knightHealth/3", 40f, 130f, paint)
-
-        if (enemyHealth > 0 && enemy.state != "death") {
-            paint.color = Color.RED
-            canvas?.drawText("HP Enemigo: $enemyHealth", width - 400f, 70f, paint)
-        }
     }
 
-    fun startMoveLeft() { movingLeft = true }
-    fun stopMoveLeft() { movingLeft = false }
-    fun startMoveRight() { movingRight = true }
-    fun stopMoveRight() { movingRight = false }
-    fun atacar() {
-        if (!attacking && knightHealth > 0) {
-            attacking = true
-            hasHit = false
-            player.frame = 0
-        }
-    }
-
-    fun resume() {
-        running = true
-        thread = Thread(this)
-        thread!!.start()
-    }
-
-    fun pause() {
-        running = false
-        thread?.join()
-    }
-
-    fun resetLevel() {
-        nivel = 1
-        enemyHealth = 1
-        knightHealth = 3
-
-        // Actualizamos en Firebase inmediatamente
-        if (userId != null) {
-            val data = hashMapOf("currentLevel" to 1)
-            db.collection("users").document(userId)
-                .set(data, SetOptions.merge())
-                .addOnSuccessListener {
-                    Log.d("Firebase", "Nivel reiniciado a 1")
-                    // Reposicionamos personajes
-                    resetPositions()
-                    // Forzamos que el enemigo vuelva al primero de la lista
-                    enemy = Character(context, Characters.ENEMIES[0])
-                }
-        }
+    private fun resetPositions() {
+        val sueloY = (height / 2f) * 0.62f
+        player.x = 100f; player.y = sueloY
+        enemy.x = width - 400f; enemy.y = sueloY
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        val x = event.x
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 when {
-                    x < width / 3 -> startMoveLeft()
-                    x > 2 * width / 3 -> startMoveRight()
+                    event.x < width / 3 -> movingLeft = true
+                    event.x > 2 * width / 3 -> movingRight = true
                     else -> atacar()
                 }
             }
-            MotionEvent.ACTION_UP -> {
-                stopMoveLeft()
-                stopMoveRight()
-            }
+            MotionEvent.ACTION_UP -> { movingLeft = false; movingRight = false }
         }
         return true
     }
+
+    fun atacar() { if (!attacking && knightHealth > 0) { attacking = true; hasHit = false; player.frame = 0 } }
+    fun resume() { running = true; thread = Thread(this); thread?.start() }
+    fun pause() { running = false; try { thread?.join() } catch (e: Exception) {} }
 }

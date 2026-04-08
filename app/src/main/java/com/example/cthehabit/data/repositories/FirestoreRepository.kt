@@ -91,6 +91,17 @@ class FirestoreRepository {
         Result.failure(e)
     }
 
+    suspend fun deleteTodayMissions(today: String) {
+        val snapshot = db.collection("missions")
+            .whereEqualTo("date", today)
+            .get()
+            .await()
+
+        snapshot.documents.forEach {
+            it.reference.delete()
+        }
+    }
+
     suspend fun getTodayMissions(date: String): Result<List<UserMission>> = try {
         val snapshot = db.collection("users")
             .document(userId)
