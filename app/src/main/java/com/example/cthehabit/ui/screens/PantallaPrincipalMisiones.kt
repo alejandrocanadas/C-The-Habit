@@ -46,6 +46,7 @@ fun PantallaPrincipalMisiones(onBack: () -> Unit) {
 
     var missions by remember { mutableStateOf<List<UserMission>>(emptyList()) }
 
+
     LaunchedEffect(Unit) {
         val today = getTodayDate()
 
@@ -54,7 +55,7 @@ fun PantallaPrincipalMisiones(onBack: () -> Unit) {
         todayResult.onSuccess { loadedTodayMissions ->
             val visibleToday = loadedTodayMissions.filter { !it.completed && !it.cancelled }
 
-            if (visibleToday.isNotEmpty()) {
+            if (loadedTodayMissions.isNotEmpty()) {
                 missions = visibleToday
             } else {
                 val questionnaireResult = firestoreRepository.getQuestionnaire()
@@ -122,6 +123,18 @@ fun PantallaPrincipalMisiones(onBack: () -> Unit) {
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
+
+            }
+
+            if (missions.isEmpty()) {
+                Spacer(modifier = Modifier.height(30.dp))
+
+                Text(
+                    text = "No hay más misiones para el día de hoy",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Gray
+                )
             }
 
             Button(
