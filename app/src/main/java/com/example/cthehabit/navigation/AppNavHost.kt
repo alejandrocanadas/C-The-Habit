@@ -11,20 +11,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.cthehabit.data.repositories.FirestoreRepository
 import com.example.cthehabit.ui.AuthViewModel
-import com.example.cthehabit.ui.screens.BottomNavScreen
-import com.example.cthehabit.ui.screens.CharacterSelectScreen
-import com.example.cthehabit.ui.screens.GameScreen
-import com.example.cthehabit.ui.screens.PantallaInicialEncuesta
-import com.example.cthehabit.ui.screens.PantallaInicialMisiones
-import com.example.cthehabit.ui.screens.PantallaInicio
-import com.example.cthehabit.ui.screens.PantallaLogin
-import com.example.cthehabit.ui.screens.PantallaPreguntas
-import com.example.cthehabit.ui.screens.PantallaPrincipalMisiones
-import com.example.cthehabit.ui.screens.PantallaRegistro
-import com.example.cthehabit.utils.Mission
-import com.example.cthehabit.utils.MissionGenerator
-import com.example.cthehabit.utils.MissionMapper
-import com.example.cthehabit.utils.getTodayDate
+import com.example.cthehabit.ui.screens.*
+import com.example.cthehabit.utils.*
 import com.example.cthehabit.viewmodels.AppUsageViewModel
 import kotlinx.coroutines.launch
 
@@ -89,7 +77,6 @@ fun AppNavHost(
         composable("preguntas") {
             PantallaPreguntas(
                 onFinish = { respuestas ->
-
                     val questionnaireMap = mapOf(
                         "q1" to (respuestas[0] ?: emptyList()),
                         "q2" to (respuestas[1] ?: emptyList()),
@@ -121,14 +108,11 @@ fun AppNavHost(
                 onContinuar = {
                     scope.launch {
                         val today = getTodayDate()
-
                         val missionsToSave = MissionMapper.toUserMissions(
                             missions = generatedMissions.value,
                             dateAssigned = today
                         )
-
                         firestoreRepository.saveMissions(missionsToSave)
-
                         navController.navigate("main") {
                             popUpTo("encuesta") { inclusive = true }
                         }
@@ -142,7 +126,7 @@ fun AppNavHost(
                 authViewModel = authViewModel,
                 usageViewModel = usageViewModel,
                 onJugarClick = { horas ->
-                    navController.navigate("characterSelect/$horas")
+                    navController.navigate("game/$horas/0/0")
                 },
                 onLogout = {
                     navController.navigate("login") {
@@ -158,13 +142,24 @@ fun AppNavHost(
             )
         }
 
-        composable("characterSelect/{horas}") { backStackEntry ->
-            val horas = backStackEntry.arguments?.getString("horas")?.toInt() ?: 0
+        composable(
+            route = "characterSelect/{horas}/{enemy}",
+            arguments = listOf(
+                navArgument("horas") { type = NavType.IntType },
+                navArgument("enemy") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val horas = backStackEntry.arguments?.getInt("horas") ?: 0
+            val enemy = backStackEntry.arguments?.getInt("enemy") ?: 0
 
             CharacterSelectScreen(
                 horas = horas,
-                onStartGame = { pIdx, eIdx ->
-                    navController.navigate("game/$horas/$pIdx/$eIdx")
+                onStartGame = { pIdx, _ ->
+                    // Reemplaza el juego actual y limpia la selección de la pila
+                    navController.navigate("game/$horas/$pIdx/$enemy") {
+                        popUpTo("main") { inclusive = false }
+                        launchSingleTop = true
+                    }
                 }
             )
         }
@@ -190,8 +185,16 @@ fun AppNavHost(
                         popUpTo("main") { inclusive = true }
                     }
                 },
+                onOpenCharacterSelect = {
+                    navController.navigate("characterSelect/$horas/$enemy")
+                },
                 onOpenTrophies = {
                     navController.navigate("main")
+                },
+                onBackToMain = {
+                    navController.navigate("main") {
+                        popUpTo("main") { inclusive = true }
+                    }
                 }
             )
         }

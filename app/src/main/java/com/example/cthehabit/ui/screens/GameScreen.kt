@@ -1,5 +1,6 @@
 package com.example.cthehabit.ui.screens
 
+import androidx.activity.compose.BackHandler // Importante
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,8 +17,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import com.example.cthehabit.ui.game.GameView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -28,15 +27,20 @@ fun GameScreen(
     playerIndex: Int,
     enemyIndex: Int,
     onSiguienteClick: () -> Unit,
-    onOpenTrophies: () -> Unit
+    onOpenCharacterSelect: () -> Unit,
+    onOpenTrophies: () -> Unit,
+    onBackToMain: () -> Unit // Nuevo parámetro para controlar el regreso
 ) {
     val context = LocalContext.current
     var nivelCargado by remember { mutableStateOf<Int?>(null) }
     val userId = FirebaseAuth.getInstance().currentUser?.uid
     var gameViewInstance by remember { mutableStateOf<GameView?>(null) }
-    var currentPlayerIndex by remember { mutableStateOf(playerIndex) }
-    var showCharacterSelect by remember { mutableStateOf(false) }
     var nivelActual by remember { mutableStateOf(1) }
+
+    // Intercepta el botón atrás del sistema (flecha del cel)
+    BackHandler {
+        onBackToMain()
+    }
 
     LaunchedEffect(Unit) {
         if (userId != null) {
@@ -66,7 +70,7 @@ fun GameScreen(
                     .clip(RoundedCornerShape(8.dp))
                     .background(Color(0xFF2A2D42))
                     .border(2.dp, Color(0xFF4FC3F7), RoundedCornerShape(8.dp))
-                    .clickable { showCharacterSelect = true },
+                    .clickable { onOpenCharacterSelect() },
                 contentAlignment = Alignment.Center
             ) { Text("⚔️", fontSize = 22.sp) }
 
@@ -81,60 +85,30 @@ fun GameScreen(
                     .clip(RoundedCornerShape(8.dp))
                     .background(Color(0xFF2A2D42))
                     .border(2.dp, Color(0xFFB8860B), RoundedCornerShape(8.dp))
-                    .clickable { onOpenTrophies() }, // ✅ Llama a la navegación
+                    .clickable { onOpenTrophies() },
                 contentAlignment = Alignment.Center
             ) { Text("🏆", fontSize = 22.sp) }
         }
 
-        // JUEGO (Ocupa todo el peso)
-        Box(modifier = Modifier.fillMaxWidth().weight(1f).background(Color.Black)) {
+        // ÁREA DEL JUEGO
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .background(Color.Black)
+        ) {
             if (nivelCargado == null) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             } else {
                 AndroidView(
                     factory = {
-                        GameView(context, horas, currentPlayerIndex, enemyIndex, nivelCargado!!).apply {
+                        GameView(context, horas, playerIndex, enemyIndex, nivelCargado!!).apply {
                             resume()
                             gameViewInstance = this
                         }
                     },
                     modifier = Modifier.fillMaxSize()
                 )
-            }
-        }
-    }
-
-    // SELECTOR DE PERSONAJE
-    if (showCharacterSelect) {
-        Dialog(
-            onDismissRequest = { showCharacterSelect = false },
-            properties = DialogProperties(usePlatformDefaultWidth = false)
-        ) {
-            MaterialTheme(colorScheme = darkColorScheme(onSurface = Color.White)) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.9f))
-                        .clickable { showCharacterSelect = false },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(0.92f)
-                            .fillMaxHeight(0.85f)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFF1A1C2C))
-                            .clickable(enabled = false) { }
-                    ) {
-                        CharacterSelectScreen(
-                            horas = horas,
-                            onStartGame = { idx, _ ->
-                                currentPlayerIndex = idx
-                                showCharacterSelect = false
-                            }
-                        )
-                    }
-                }
             }
         }
     }
