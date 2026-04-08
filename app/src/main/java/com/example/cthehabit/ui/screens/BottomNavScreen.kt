@@ -40,6 +40,7 @@ val bottomNavItems = listOf(
 
 @Composable
 fun BottomNavScreen(
+
     authViewModel: AuthViewModel,
     usageViewModel: AppUsageViewModel,
     onJugarClick: (Int) -> Unit,
@@ -48,6 +49,12 @@ fun BottomNavScreen(
     val innerNavController = rememberNavController()
     val navBackStackEntry by innerNavController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    val context = LocalContext.current
+
+    // Registrar auto-refresh una sola vez al montar la pantalla
+    LaunchedEffect(Unit) {
+        usageViewModel.observeSyncAndAutoRefresh(context)
+    }
 
     Scaffold(
         containerColor = Color(0xFF1A1C2C),
@@ -142,7 +149,7 @@ fun BottomNavScreen(
 @Composable
 fun SeccionEstadisticas(usageViewModel: AppUsageViewModel, navController: NavHostController) {
     val context = LocalContext.current
-    val usageData by remember { usageViewModel.usageData }
+    val usageData by usageViewModel.usageData
     var modoSieteDias by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {

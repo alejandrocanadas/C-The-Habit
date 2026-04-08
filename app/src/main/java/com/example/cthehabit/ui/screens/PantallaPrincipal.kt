@@ -1,5 +1,6 @@
 package com.example.cthehabit.ui.screens
 
+import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -36,10 +37,16 @@ fun PantallaPrincipal(
     var remainingTime by remember { mutableStateOf("--") }
     var mostrarConfirmacion by remember { mutableStateOf(false) }
 
-    LaunchedEffect(nextSyncTime) {
+    LaunchedEffect(Unit) {
+        val prefs = context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE)
         while (true) {
-            val diff = nextSyncTime - System.currentTimeMillis()
-            remainingTime = if (diff > 0) "${diff / 60000} min" else "sincronizando..."
+            val next = prefs.getLong("next_sync_time", 0L)
+            val diff = next - System.currentTimeMillis()
+            remainingTime = when {
+                diff > 60_000L -> "${diff / 60000} min ${(diff % 60000) / 1000} seg"
+                diff > 0L      -> "${diff / 1000} seg"
+                else           -> "sincronizando..."   // WorkManager está por ejecutar o ejecutándose
+            }
             delay(1000)
         }
     }
