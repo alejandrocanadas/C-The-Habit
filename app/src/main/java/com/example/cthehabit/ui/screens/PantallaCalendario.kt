@@ -1,8 +1,12 @@
 package com.example.cthehabit.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,18 +20,30 @@ import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.*
 import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.*
-import androidx.compose.foundation.border
+import com.example.cthehabit.data.repositories.FirestoreRepository
 
-// Categorías de desempeño (por ahora vacías, después las llenamos)
 enum class DayStatus {
-    GOOD,    // verde
-    REGULAR, // amarillo
-    BAD,     // rojo
-    NONE     // sin datos
+    GOOD,
+    REGULAR,
+    BAD,
+    NONE
 }
+
+// Modelo para agrupar misiones por día en el historial
+data class DayMissionSummary(
+    val date: LocalDate,
+    val missions: List<MissionHistoryItem>
+)
+
+data class MissionHistoryItem(
+    val text: String,
+    val completed: Boolean
+)
 
 @Composable
 fun PantallaCalendario() {
@@ -44,16 +60,58 @@ fun PantallaCalendario() {
         firstDayOfWeek = firstDayOfWeek
     )
 
-    // Mapa de días con estado (por ahora vacío, después vendrá de Firestore)
     val dayStatusMap = remember { mutableStateOf<Map<String, DayStatus>>(emptyMap()) }
+    val weekHistory = remember { mutableStateOf<List<DayMissionSummary>>(emptyList()) }
+
+    val firestoreRepository = remember { FirestoreRepository() }
+
+    // Carga desde Firestore el historial de los últimos 7 días
+    LaunchedEffect(Unit) {
+        val today = LocalDate.now()
+        val statusMap = mutableMapOf<String, DayStatus>()
+        val history = mutableListOf<DayMissionSummary>()
+
+        for (i in 0..6) {
+            val date = today.minusDays(i.toLong())
+            val dateStr = date.toString()
+
+            val result = firestoreRepository.getMissionsForDate(dateStr)
+            result.onSuccess { missions ->
+                if (missions.isEmpty()) return@onSuccess
+
+                val completed = missions.count { it.completed }
+                val total = missions.size
+
+                val status = when {
+                    completed == total -> DayStatus.GOOD
+                    completed > 0 -> DayStatus.REGULAR
+                    else -> DayStatus.BAD
+                }
+                statusMap[dateStr] = status
+
+                history.add(
+                    DayMissionSummary(
+                        date = date,
+                        missions = missions.map {
+                            MissionHistoryItem(text = it.text, completed = it.completed)
+                        }
+                    )
+                )
+            }
+        }
+
+        dayStatusMap.value = statusMap
+        // Ordenar del más reciente al más antiguo
+        weekHistory.value = history.sortedByDescending { it.date }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
 
-        // Título del mes actual
         val visibleMonth = state.firstVisibleMonth.yearMonth
         Text(
             text = visibleMonth.month
@@ -61,43 +119,154 @@ fun PantallaCalendario() {
                 .replaceFirstChar { it.uppercase() } + " ${visibleMonth.year}",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
+            color = Color.White,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 12.dp),
             textAlign = TextAlign.Center
         )
 
-        // Días de la semana
-        DaysOfWeekHeader(firstDayOfWeek = firstDayOfWeek)
+        // ── Calendario con fondo blanco ──────────────────────────────────
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        ) {
+            Column(modifier = Modifier.padding(12.dp)) {
 
-        Spacer(modifier = Modifier.height(8.dp))
+                DaysOfWeekHeader(firstDayOfWeek = firstDayOfWeek)
 
-        // Calendario
-        HorizontalCalendar(
-            state = state,
-            dayContent = { day ->
-                DayCell(
-                    day = day,
-                    status = dayStatusMap.value[day.date.toString()] ?: DayStatus.NONE
+                Spacer(modifier = Modifier.height(8.dp))
+
+                HorizontalCalendar(
+                    state = state,
+                    modifier = Modifier.height(260.dp),
+                    dayContent = { day ->
+                        DayCell(
+                            day = day,
+                            status = dayStatusMap.value[day.date.toString()] ?: DayStatus.NONE
+                        )
+                    }
                 )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                CalendarLegend()
             }
-        )
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Leyenda
-        CalendarLegend()
-
-        Spacer(modifier = Modifier.height(24.dp))
-
+        // ── Título historial ─────────────────────────────────────────────
         Text(
-            "Historial de Misiones",
+            text = "Historial de misiones",
             fontWeight = FontWeight.Bold,
+            fontSize = 16.sp,
+            color = Color.White,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 12.dp),
             textAlign = TextAlign.Center
         )
+
+        // ── Tarjetas de historial semanal ────────────────────────────────
+        if (weekHistory.value.isEmpty()) {
+            Text(
+                text = "No hay historial disponible aún",
+                fontSize = 14.sp,
+                color = Color.Gray,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+        } else {
+            weekHistory.value.forEach { daySummary ->
+                MissionHistoryCard(daySummary = daySummary, dayStatusMap = dayStatusMap.value)
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun MissionHistoryCard(
+    daySummary: DayMissionSummary,
+    dayStatusMap: Map<String, DayStatus>
+) {
+    val dateStr = daySummary.date.toString()
+    val status = dayStatusMap[dateStr] ?: DayStatus.NONE
+
+    val formatter = DateTimeFormatter.ofPattern("EEEE, d 'de' MMMM", Locale("es", "ES"))
+    val dateLabel = daySummary.date.format(formatter).replaceFirstChar { it.uppercase() }
+
+    val (statusLabel, statusBg, statusTextColor) = when (status) {
+        DayStatus.GOOD    -> Triple("Buen día",   Color(0xFFE8F5E9), Color(0xFF2E7D32))
+        DayStatus.REGULAR -> Triple("Regular",    Color(0xFFFFF8E1), Color(0xFFF57F17))
+        DayStatus.BAD     -> Triple("Mal día",    Color(0xFFFFEBEE), Color(0xFFB71C1C))
+        DayStatus.NONE    -> Triple("Sin datos",  Color(0xFFF5F5F5), Color(0xFF757575))
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Column(modifier = Modifier.padding(14.dp)) {
+
+            // Encabezado: fecha + badge de estado
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = dateLabel,
+                    fontSize = 12.sp,
+                    color = Color.Gray
+                )
+                Box(
+                    modifier = Modifier
+                        .background(color = statusBg, shape = RoundedCornerShape(20.dp))
+                        .padding(horizontal = 10.dp, vertical = 3.dp)
+                ) {
+                    Text(
+                        text = statusLabel,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = statusTextColor
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Lista de misiones del día
+            daySummary.missions.forEach { mission ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(vertical = 3.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .background(
+                                color = if (mission.completed) Color(0xFF4CAF50) else Color(0xFFF44336),
+                                shape = CircleShape
+                            )
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = mission.text,
+                        fontSize = 13.sp,
+                        color = if (mission.completed)
+                            MaterialTheme.colorScheme.onSurface
+                        else
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    )
+                }
+            }
+        }
     }
 }
 

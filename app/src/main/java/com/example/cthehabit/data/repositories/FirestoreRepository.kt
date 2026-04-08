@@ -185,5 +185,23 @@ class FirestoreRepository {
         Result.failure(e)
     }
 
+    // En FirestoreRepository.kt
+    suspend fun getMissionsForDate(date: String): Result<List<UserMission>> = try {
+        val snapshot = db.collection("users")
+            .document(userId)
+            .collection("missions")
+            .whereEqualTo("dateAssigned", date)
+            .get()
+            .await()
+
+        val missions = snapshot.documents.mapNotNull { doc ->
+            doc.toObject(UserMission::class.java)
+        }
+
+        Result.success(missions)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
 
 }
