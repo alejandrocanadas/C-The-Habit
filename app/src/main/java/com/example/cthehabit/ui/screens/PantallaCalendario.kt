@@ -37,13 +37,29 @@ enum class DayStatus {
 // Modelo para agrupar misiones por día en el historial
 data class DayMissionSummary(
     val date: LocalDate,
-    val missions: List<MissionHistoryItem>
+    val missions: List<MissionHistoryItem>,
+    val usageHours: Double,
+    val usageLimitHours: Double
 )
 
 data class MissionHistoryItem(
     val text: String,
     val completed: Boolean
 )
+
+fun getDailyUsageLimitHours(q1Answer: String): Double {
+    return when (q1Answer.trim()) {
+        "1 a 2 horas" -> 0.5
+        "2 a 4 horas" -> 1.0
+        "3 a 5 horas" -> 1.5
+        "+5 horas", "Más de 5 horas" -> 2.5
+        else -> 24.0
+    }
+}
+
+fun millisToHours(millis: Long): Double {
+    return millis / 1000.0 / 60.0 / 60.0
+}
 
 @Composable
 fun PantallaCalendario() {
@@ -71,6 +87,20 @@ fun PantallaCalendario() {
         val statusMap = mutableMapOf<String, DayStatus>()
         val history = mutableListOf<DayMissionSummary>()
 
+        // 1. Leer cuestionario para sacar la meta diaria según q1
+        val questionnaireResult = firestoreRepository.getQuestionnaire()
+        val q1Answer = questionnaireResult.getOrNull()
+            ?.get("q1")
+            ?.firstOrNull()
+            .orEmpty()
+
+        val usageLimitHours = getDailyUsageLimitHours(q1Answer)
+
+        // 2. Leer eventos de uso guardados en Firestore
+        val usageEventsResult = firestoreRepository.getUsageEvents()
+        val usageEvents = usageEventsResult.getOrNull().orEmpty()
+
+        // 3. Revisar últimos 7 días
         for (i in 0..6) {
             val date = today.minusDays(i.toLong())
             val dateStr = date.toString()
@@ -82,28 +112,38 @@ fun PantallaCalendario() {
                 val completed = missions.count { it.completed }
                 val total = missions.size
 
+                val usageMillis = usageEvents[dateStr]?.values?.sum() ?: 0L
+                val usageHours = millisToHours(usageMillis)
+
                 val status = when {
+                    usageHours > usageLimitHours -> DayStatus.BAD
                     completed == total -> DayStatus.GOOD
                     completed > 0 -> DayStatus.REGULAR
                     else -> DayStatus.BAD
                 }
+
                 statusMap[dateStr] = status
 
                 history.add(
                     DayMissionSummary(
                         date = date,
                         missions = missions.map {
-                            MissionHistoryItem(text = it.text, completed = it.completed)
-                        }
+                            MissionHistoryItem(
+                                text = it.text,
+                                completed = it.completed
+                            )
+                        },
+                        usageHours = usageHours,
+                        usageLimitHours = usageLimitHours
                     )
                 )
             }
         }
 
         dayStatusMap.value = statusMap
-        // Ordenar del más reciente al más antiguo
         weekHistory.value = history.sortedByDescending { it.date }
     }
+
 
     Column(
         modifier = Modifier
@@ -238,6 +278,21 @@ fun MissionHistoryCard(
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Uso en redes: ${
+                    String.format(Locale("es", "ES"), "%.1f", daySummary.usageHours)
+                } h / Meta: ${
+                    String.format(Locale("es", "ES"), "%.1f", daySummary.usageLimitHours)
+                } h",
+                fontSize = 12.sp,
+                color = if (daySummary.usageHours > daySummary.usageLimitHours)
+                    Color(0xFFB71C1C)
+                else
+                    Color(0xFF2E7D32)
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
