@@ -117,3 +117,109 @@ fun GameScreen(
         onDispose { gameViewInstance?.pause() }
     }
 }
+
+@Composable
+fun BattleSection(
+    horas: Int,
+    playerIndex: Int,
+    enemyIndex: Int,
+    onOpenCharacterSelect: () -> Unit,
+    onOpenTrophies: () -> Unit
+) {
+    val context = LocalContext.current
+    var nivelCargado by remember { mutableStateOf<Int?>(null) }
+    val userId = FirebaseAuth.getInstance().currentUser?.uid
+    var gameViewInstance by remember { mutableStateOf<GameView?>(null) }
+    var nivelActual by remember { mutableStateOf(1) }
+
+    LaunchedEffect(Unit) {
+        if (userId != null) {
+            FirebaseFirestore.getInstance().collection("users")
+                .document(userId).get()
+                .addOnSuccessListener { doc ->
+                    val lvl = doc.getLong("currentLevel")?.toInt() ?: 1
+                    nivelCargado = lvl
+                    nivelActual = lvl
+                }
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.DarkGray)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color(0xFF1A1C2C))
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color(0xFF2A2D42))
+                    .border(2.dp, Color(0xFF4FC3F7), RoundedCornerShape(8.dp))
+                    .clickable { onOpenCharacterSelect() },
+                contentAlignment = Alignment.Center
+            ) {
+                Text("⚔️", fontSize = 22.sp)
+            }
+
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    "NIVEL",
+                    fontSize = 9.sp,
+                    color = Color(0xFF9A9EC4),
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    "$nivelActual",
+                    fontSize = 22.sp,
+                    color = Color(0xFFFFD700),
+                    fontWeight = FontWeight.Black
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color(0xFF2A2D42))
+                    .border(2.dp, Color(0xFFB8860B), RoundedCornerShape(8.dp))
+                    .clickable { onOpenTrophies() },
+                contentAlignment = Alignment.Center
+            ) {
+                Text("🏆", fontSize = 22.sp)
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(320.dp)
+                .background(Color.Black)
+        ) {
+            if (nivelCargado == null) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            } else {
+                AndroidView(
+                    factory = {
+                        GameView(context, horas, playerIndex, enemyIndex, nivelCargado!!).apply {
+                            resume()
+                            gameViewInstance = this
+                        }
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose { gameViewInstance?.pause() }
+    }
+}

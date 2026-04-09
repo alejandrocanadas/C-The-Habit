@@ -126,7 +126,7 @@ fun AppNavHost(
                 authViewModel = authViewModel,
                 usageViewModel = usageViewModel,
                 onJugarClick = { horas ->
-                    navController.navigate("game/$horas/0/0")
+                    navController.navigate("batalla_misiones/$horas/0/0")
                 },
                 onLogout = {
                     navController.navigate("login") {
@@ -156,10 +156,40 @@ fun AppNavHost(
                 horas = horas,
                 onStartGame = { pIdx, _ ->
                     // Reemplaza el juego actual y limpia la selección de la pila
-                    navController.navigate("game/$horas/$pIdx/$enemy") {
+                    navController.navigate("batalla_misiones/$horas/$pIdx/$enemy") {
                         popUpTo("main") { inclusive = false }
                         launchSingleTop = true
                     }
+                }
+            )
+        }
+
+        composable(
+            route = "batalla_misiones/{horas}/{player}/{enemy}",
+            arguments = listOf(
+                navArgument("horas") { type = NavType.IntType },
+                navArgument("player") { type = NavType.IntType },
+                navArgument("enemy") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val horas = backStackEntry.arguments?.getInt("horas") ?: 0
+            val player = backStackEntry.arguments?.getInt("player") ?: 0
+            val enemy = backStackEntry.arguments?.getInt("enemy") ?: 0
+
+            PantallaBatallaMisiones(
+                horas = horas,
+                playerIndex = player,
+                enemyIndex = enemy,
+                onBack = {
+                    navController.navigate("main") {
+                        popUpTo("main") { inclusive = true }
+                    }
+                },
+                onOpenCharacterSelect = {
+                    navController.navigate("characterSelect/$horas/$enemy")
+                },
+                onOpenTrophies = {
+                    navController.navigate("main")
                 }
             )
         }
