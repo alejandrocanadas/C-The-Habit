@@ -1,0 +1,147 @@
+package com.example.cthehabit.ui.screens
+
+import android.content.Context
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import com.example.cthehabit.ui.AuthViewModel
+import com.example.cthehabit.viewmodels.AppUsageViewModel
+import com.example.cthehabit.utils.hasUsageStatsPermission
+import com.example.cthehabit.utils.requestUsagePermission
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
+import kotlinx.coroutines.delay
+
+@Composable
+fun PantallaPerfil(
+    authViewModel: AuthViewModel,
+    usageViewModel: AppUsageViewModel,
+    onLogout: () -> Unit
+) {
+    val context = LocalContext.current
+    var tienePermiso by remember { mutableStateOf(hasUsageStatsPermission(context)) }
+
+    val prefs = context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE)
+    var remainingTime by remember { mutableStateOf("--") }
+    var mostrarConfirmacion by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            val next = prefs.getLong("next_sync_time", 0L)
+            val diff = next - System.currentTimeMillis()
+
+            remainingTime = when {
+                diff > 60_000L -> "${diff / 60000} min ${(diff % 60000) / 1000} seg"
+                diff > 0L -> "${diff / 1000} seg"
+                else -> "sincronizando..."
+            }
+
+            println("NEXT SYNC TIME: $next")
+            println("DIFF: $diff")
+            println("REMAINING: $remainingTime")
+
+            delay(1000)
+        }
+    }
+
+    LaunchedEffect(tienePermiso) {
+        if (tienePermiso) {
+            authViewModel.saveUsageEvent(context, {}, {})
+        }
+    }
+
+    if (mostrarConfirmacion) {
+        AlertDialog(
+            onDismissRequest = { mostrarConfirmacion = false },
+            title = { Text("¿Reiniciar nivel?") },
+            text = { Text("Tu progreso volverá al nivel 1. ¿Estás seguro?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        mostrarConfirmacion = false
+                        val userId = FirebaseAuth.getInstance().currentUser?.uid
+                        userId?.let {
+                            FirebaseFirestore.getInstance()
+                                .collection("users")
+                                .document(it)
+                                .set(mapOf("currentLevel" to 1), SetOptions.merge())
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
+                ) {
+                    Text("Sí, reiniciar", color = Color.White)
+                }
+            },
+            dismissButton = {
+                OutlinedButton(onClick = { mostrarConfirmacion = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Perfil",
+            style = MaterialTheme.typography.headlineMedium,
+            color = Color.White
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        if (!tienePermiso) {
+            Text("Debes conceder permiso de uso", color = Color.White)
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    requestUsagePermission(context)
+                    tienePermiso = hasUsageStatsPermission(context)
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Conceder permiso")
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+        } else {
+            Text("Siguiente sincronización en: $remainingTime", color = Color.Gray)
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+
+        OutlinedButton(
+            onClick = { mostrarConfirmacion = true },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = Color(0xFFD32F2F)
+            )
+        ) {
+            Text("Reiniciar nivel")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = onLogout,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+        ) {
+            Text("Cerrar sesión", color = Color.White)
+        }
+    }
+}

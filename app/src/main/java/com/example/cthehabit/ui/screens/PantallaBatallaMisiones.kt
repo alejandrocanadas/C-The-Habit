@@ -141,12 +141,6 @@ fun PantallaBatallaMisiones(
                         color = Color.Gray
                     )
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Button(onClick = onBack) {
-                    Text("Volver")
-                }
             }
         }
     }

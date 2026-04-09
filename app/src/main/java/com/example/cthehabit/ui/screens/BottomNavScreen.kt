@@ -14,7 +14,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.*
+import androidx.navigation.navArgument
 import com.example.cthehabit.ui.AuthViewModel
 import com.example.cthehabit.viewmodels.AppUsageViewModel
 import com.example.cthehabit.utils.*
@@ -107,15 +109,17 @@ fun BottomNavScreen(
 
             // PESTAÑA 3: JUEGO (Pantalla Principal con lógica de nivel y sync)
             composable(BottomNavDestination.Juego.route) {
-                PantallaPrincipal(
-                    navController = innerNavController,
-                    authViewModel = authViewModel,
-                    usageViewModel = usageViewModel,
-                    onGraficas24h = { innerNavController.navigate("graficas_internas/24h") },
-                    onGraficas7d = { innerNavController.navigate("graficas_internas/7d") },
-                    onJugarClick = onJugarClick,
-                    onMisionesClick = { innerNavController.navigate("misiones_internas") },
-                    onTrofeosClick = { innerNavController.navigate(BottomNavDestination.Trofeos.route) }
+                PantallaBatallaMisiones(
+                    horas = 5,
+                    playerIndex = 0,
+                    enemyIndex = 0,
+                    onBack = {},
+                    onOpenCharacterSelect = {
+                        innerNavController.navigate("character_select_interno/5/0")
+                    },
+                    onOpenTrophies = {
+                        innerNavController.navigate(BottomNavDestination.Trofeos.route)
+                    }
                 )
             }
 
@@ -126,11 +130,11 @@ fun BottomNavScreen(
 
             // PESTAÑA 5: PERFIL
             composable(BottomNavDestination.Perfil.route) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Button(onClick = onLogout, colors = ButtonDefaults.buttonColors(containerColor = Color.Red)) {
-                        Text("Cerrar Sesión", color = Color.White)
-                    }
-                }
+                PantallaPerfil(
+                    authViewModel = authViewModel,
+                    usageViewModel = usageViewModel,
+                    onLogout = onLogout
+                )
             }
 
             // RUTAS INTERNAS (Navegación dentro del BottomBar)
@@ -141,6 +145,53 @@ fun BottomNavScreen(
 
             composable("misiones_internas") {
                 PantallaPrincipalMisiones(onBack = { innerNavController.popBackStack() })
+            }
+
+            composable(
+                route = "character_select_interno/{horas}/{enemy}",
+                arguments = listOf(
+                    navArgument("horas") { type = NavType.IntType },
+                    navArgument("enemy") { type = NavType.IntType }
+                )
+            ) { backStackEntry ->
+                val horas = backStackEntry.arguments?.getInt("horas") ?: 0
+                val enemy = backStackEntry.arguments?.getInt("enemy") ?: 0
+
+                CharacterSelectScreen(
+                    horas = horas,
+                    onStartGame = { pIdx, _ ->
+                        innerNavController.navigate("batalla_misiones_interna/$horas/$pIdx/$enemy") {
+                            popUpTo(BottomNavDestination.Juego.route) { inclusive = false }
+                            launchSingleTop = true
+                        }
+                    }
+                )
+            }
+
+            composable(
+                route = "batalla_misiones_interna/{horas}/{player}/{enemy}",
+                arguments = listOf(
+                    navArgument("horas") { type = NavType.IntType },
+                    navArgument("player") { type = NavType.IntType },
+                    navArgument("enemy") { type = NavType.IntType }
+                )
+            ) { backStackEntry ->
+                val horas = backStackEntry.arguments?.getInt("horas") ?: 0
+                val player = backStackEntry.arguments?.getInt("player") ?: 0
+                val enemy = backStackEntry.arguments?.getInt("enemy") ?: 0
+
+                PantallaBatallaMisiones(
+                    horas = horas,
+                    playerIndex = player,
+                    enemyIndex = enemy,
+                    onBack = { innerNavController.popBackStack() },
+                    onOpenCharacterSelect = {
+                        innerNavController.navigate("character_select_interno/$horas/$enemy")
+                    },
+                    onOpenTrophies = {
+                        innerNavController.navigate(BottomNavDestination.Trofeos.route)
+                    }
+                )
             }
         }
     }
