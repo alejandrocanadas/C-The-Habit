@@ -3,23 +3,17 @@ package com.example.cthehabit.ui.screens
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.cthehabit.data.entity.UserMission
-import com.example.cthehabit.data.repositories.FirestoreRepository
-import com.example.cthehabit.utils.DailyMissionPlanner
-import com.example.cthehabit.utils.MissionGenerator
-import com.example.cthehabit.utils.getTodayDate
-import kotlinx.coroutines.launch
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun PantallaBatallaMisiones(
@@ -28,61 +22,12 @@ fun PantallaBatallaMisiones(
     enemyIndex: Int,
     onBack: () -> Unit,
     onOpenCharacterSelect: () -> Unit,
-    onOpenTrophies: () -> Unit
+    onOpenTrophies: () -> Unit,
+    onOpenMissions: () -> Unit
 ) {
-    val scope = rememberCoroutineScope()
-    val firestoreRepository = remember { FirestoreRepository() }
+    BackHandler { onBack() }
 
-    var missions by remember { mutableStateOf<List<UserMission>>(emptyList()) }
-
-    BackHandler {
-        onBack()
-    }
-
-    LaunchedEffect(Unit) {
-        val today = getTodayDate()
-
-        val todayResult = firestoreRepository.getTodayMissions(today)
-
-        todayResult.onSuccess { loadedTodayMissions ->
-            val visibleToday = loadedTodayMissions.filter { !it.completed && !it.cancelled }
-
-            if (loadedTodayMissions.isNotEmpty()) {
-                missions = visibleToday
-            } else {
-                val questionnaireResult = firestoreRepository.getQuestionnaire()
-                val pendingResult = firestoreRepository.getPendingMissionsBefore(today)
-
-                if (questionnaireResult.isSuccess && pendingResult.isSuccess) {
-                    val questionnaire = questionnaireResult.getOrNull().orEmpty()
-                    val pending = pendingResult.getOrNull().orEmpty()
-
-                    val hoursAnswer = questionnaire["q1"]?.firstOrNull().orEmpty()
-                    val momentAnswer = questionnaire["q2"]?.firstOrNull().orEmpty()
-                    val selectedActivities = questionnaire["q3"] ?: emptyList()
-
-                    val generated = MissionGenerator.generateMissions(
-                        hoursAnswer = hoursAnswer,
-                        momentAnswer = momentAnswer,
-                        selectedActivities = selectedActivities
-                    )
-
-                    val todayPlan = DailyMissionPlanner.buildTodayMissions(
-                        pending = pending,
-                        generated = generated,
-                        today = today
-                    )
-
-                    firestoreRepository.saveMissions(todayPlan)
-                    missions = todayPlan
-                }
-            }
-        }
-    }
-
-    Scaffold(
-        containerColor = Color.DarkGray
-    ) { innerPadding ->
+    Scaffold(containerColor = Color.DarkGray) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -97,50 +42,34 @@ fun PantallaBatallaMisiones(
                 onOpenTrophies = onOpenTrophies
             )
 
-            Column(
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(
+                onClick = onOpenMissions,
                 modifier = Modifier
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp)
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+                    .height(56.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF1E3A5F)
+                ),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp)
             ) {
+                Icon(
+                    imageVector = Icons.Filled.Star,
+                    contentDescription = null,
+                    tint = Color(0xFFFFD700),
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(10.dp))
                 Text(
-                    text = "Misiones de Hoy",
-                    style = MaterialTheme.typography.headlineMedium,
+                    text = "Ver misiones",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
 
-                Spacer(modifier = Modifier.height(20.dp))
-
-                missions.forEach { mission ->
-                    MissionCard(
-                        mission = mission,
-                        onComplete = {
-                            scope.launch {
-                                firestoreRepository.completeMission(mission.id)
-                                missions = missions.filter { it.id != mission.id }
-                            }
-                        },
-                        onCancel = {
-                            scope.launch {
-                                firestoreRepository.cancelMission(mission.id)
-                                missions = missions.filter { it.id != mission.id }
-                            }
-                        }
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-
-                if (missions.isEmpty()) {
-                    Spacer(modifier = Modifier.height(30.dp))
-
-                    Text(
-                        text = "No hay más misiones para el día de hoy",
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Gray
-                    )
-                }
             }
         }
     }

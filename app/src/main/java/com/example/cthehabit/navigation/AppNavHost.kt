@@ -190,6 +190,9 @@ fun AppNavHost(
                 },
                 onOpenTrophies = {
                     navController.navigate("main")
+                },
+                onOpenMissions = { // 👈 AÑADE ESTO
+                    navController.navigate("misiones")
                 }
             )
         }

@@ -119,6 +119,9 @@ fun BottomNavScreen(
                     },
                     onOpenTrophies = {
                         innerNavController.navigate(BottomNavDestination.Trofeos.route)
+                    },
+                    onOpenMissions = {
+                        innerNavController.navigate("misiones_internas") // 👈
                     }
                 )
             }
@@ -190,6 +193,9 @@ fun BottomNavScreen(
                     },
                     onOpenTrophies = {
                         innerNavController.navigate(BottomNavDestination.Trofeos.route)
+                    },
+                    onOpenMissions = {
+                        innerNavController.navigate("misiones_internas") // 👈 ESTA ES LA CLAVE
                     }
                 )
             }
