@@ -111,6 +111,7 @@ fun PantallaPrincipalMisiones(onBack: () -> Unit) {
                     onComplete = {
                         scope.launch {
                             firestoreRepository.completeMission(mission.id)
+                            firestoreRepository.addXpToUser(50)
                             missions = missions.filter { it.id != mission.id }
                         }
                     },

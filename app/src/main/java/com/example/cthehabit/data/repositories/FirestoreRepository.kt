@@ -133,6 +133,27 @@ class FirestoreRepository {
         Result.failure(e)
     }
 
+    suspend fun addXpToUser(xpAmount: Int): Result<Unit> = try {
+        val docRef = db.collection("users").document(userId)
+        val doc = docRef.get().await()
+
+        var xpActual = doc.getLong("xp")?.toInt() ?: 0
+        var nivelActual = doc.getLong("currentLevel")?.toInt() ?: 1
+
+        xpActual += xpAmount
+        val xpMeta = 150 + ((nivelActual - 1) * 100)
+
+        if (xpActual >= xpMeta) {
+            xpActual -= xpMeta
+            nivelActual++
+        }
+
+        docRef.update(mapOf("xp" to xpActual, "currentLevel" to nivelActual)).await()
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
     suspend fun cancelMission(missionId: String): Result<Unit> = try {
         db.collection("users")
             .document(userId)
