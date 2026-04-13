@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.cthehabit.data.repositories.FirestoreRepository
+import com.example.cthehabit.services.NotificationHelper
 import com.example.cthehabit.ui.AuthViewModel
 import com.example.cthehabit.ui.screens.*
 import com.example.cthehabit.utils.*
@@ -48,6 +49,9 @@ fun AppNavHost(
                 onBack = { navController.popBackStack() },
                 onLogin = { navController.navigate("login") },
                 onRegistroExitoso = {
+
+                    NotificationHelper.showWelcomeNotification(navController.context)
+
                     navController.navigate("encuesta") {
                         popUpTo("Inicio") { inclusive = true }
                     }
@@ -61,10 +65,13 @@ fun AppNavHost(
                 onBack = { navController.popBackStack() },
                 onRegistro = { navController.navigate("registro") },
                 onLoginExitoso = {
+                    NotificationHelper.showWelcomeNotification(navController.context)
+
                     navController.navigate("main") {
                         popUpTo("Inicio") { inclusive = true }
                     }
                 }
+
             )
         }
 

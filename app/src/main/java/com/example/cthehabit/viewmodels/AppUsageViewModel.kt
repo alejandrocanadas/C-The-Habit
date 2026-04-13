@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cthehabit.data.repositories.getUsageLast24h
 import com.example.cthehabit.data.repositories.getUsageLast7Days
+import com.example.cthehabit.services.NotificationHelper
+import com.example.cthehabit.services.getTodaySocialMinutes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -25,7 +27,7 @@ class AppUsageViewModel : ViewModel() {
         val ctx = context.applicationContext
         viewModelScope.launch(Dispatchers.IO) {
             val data = getUsageLast24h(ctx)
-            withContext(Dispatchers.Main) {   // ← actualiza en Main para que Compose lo vea
+            withContext(Dispatchers.Main) {
                 usageData.value = data
             }
         }
@@ -47,9 +49,13 @@ class AppUsageViewModel : ViewModel() {
 
         appContext = context.applicationContext
 
-        // Carga inmediata al abrir la app — equivale a presionar "Calcular Métricas 24h"
+        // Carga inicial al abrir la app
         viewModelScope.launch(Dispatchers.IO) {
             val data = getUsageLast24h(appContext!!)
+            // ── Check de notificaciones en la carga inicial ──────────────────
+            val minutes = getTodaySocialMinutes(data)
+            NotificationHelper.checkAndNotify(appContext!!, minutes)
+            // ─────────────────────────────────────────────────────────────────
             withContext(Dispatchers.Main) {
                 usageData.value = data
             }
@@ -63,6 +69,11 @@ class AppUsageViewModel : ViewModel() {
                 viewModelScope.launch(Dispatchers.IO) {
                     val data = if (currentMode == "7d") getUsageLast7Days(ctx)
                     else getUsageLast24h(ctx)
+
+                    // ── Check de notificaciones en cada auto-refresh ─────────
+                    val minutes = getTodaySocialMinutes(data)
+                    NotificationHelper.checkAndNotify(ctx, minutes)
+                    // ─────────────────────────────────────────────────────────
                     withContext(Dispatchers.Main) {
                         usageData.value = data
                     }
