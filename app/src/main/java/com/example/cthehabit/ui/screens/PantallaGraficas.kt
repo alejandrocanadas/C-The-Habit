@@ -31,7 +31,7 @@ import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 
-// ─── Paleta neon-dark ────────────────────────────────────────────────────────
+
 private val BgDark       = Color(0xFF0D0F14)
 private val Surface1     = Color(0xFF161A22)
 private val Surface2     = Color(0xFF1E2330)
@@ -57,7 +57,7 @@ private val ChartColors = listOf(
     android.graphics.Color.parseColor("#60A5FA"),
 )
 
-// ─── Pantalla principal ───────────────────────────────────────────────────────
+
 @Composable
 fun PantallaGraficas(tipo: String) {
     val context = LocalContext.current
@@ -66,7 +66,7 @@ fun PantallaGraficas(tipo: String) {
     val usageByApp   = getUsageByApp(apps)
     val dailyUsage   = getDailyUsage(apps)
 
-    // Mapeo a nombres amigables
+    // Mapeo a nombres
     val usageByAppFriendly: Map<String, Float> = usageByApp
         .mapKeys { SocialApps.getAppName(it.key) ?: it.key }
         .entries
@@ -88,7 +88,7 @@ fun PantallaGraficas(tipo: String) {
             .fillMaxSize()
             .background(BgDark)
     ) {
-        // Fondo decorativo: puntos en grid
+        // Fondo
         GridDotBackground()
 
         Column(
@@ -98,12 +98,12 @@ fun PantallaGraficas(tipo: String) {
                 .padding(horizontal = 20.dp, vertical = 24.dp)
         ) {
 
-            // ── Header ───────────────────────────────────────────────────────
+
             HeaderSection(tipo)
 
             Spacer(Modifier.height(20.dp))
 
-            // ── Stat cards ──────────────────────────────────────────────────
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -130,7 +130,7 @@ fun PantallaGraficas(tipo: String) {
 
             Spacer(Modifier.height(24.dp))
 
-            // ── Pie chart ────────────────────────────────────────────────────
+
             ChartCard(
                 title    = "Distribución por app",
                 subtitle = "Participación relativa del tiempo",
@@ -142,7 +142,7 @@ fun PantallaGraficas(tipo: String) {
 
             Spacer(Modifier.height(16.dp))
 
-            // ── Bar chart ────────────────────────────────────────────────────
+
             ChartCard(
                 title    = "Tiempo por aplicación",
                 subtitle = "Minutos de uso acumulados",
@@ -152,7 +152,6 @@ fun PantallaGraficas(tipo: String) {
                 NeonBarChart(usageByAppFriendly)
             }
 
-            // ── Line chart (solo 7d) ─────────────────────────────────────────
             if (tipo == "7d") {
                 Spacer(Modifier.height(16.dp))
                 ChartCard(
@@ -169,7 +168,6 @@ fun PantallaGraficas(tipo: String) {
         }
     }
 
-    // ── Dialog expandido ─────────────────────────────────────────────────────
     if (expandedChart != null) {
         Dialog(
             onDismissRequest = { expandedChart = null },
@@ -198,7 +196,7 @@ fun PantallaGraficas(tipo: String) {
     }
 }
 
-// ─── Header ──────────────────────────────────────────────────────────────────
+// Header
 @Composable
 private fun HeaderSection(tipo: String) {
     val isToday  = tipo == "24h"
@@ -236,7 +234,7 @@ private fun HeaderSection(tipo: String) {
     }
 }
 
-// ─── Stat card ───────────────────────────────────────────────────────────────
+
 @Composable
 private fun StatCard(
     modifier: Modifier = Modifier,
@@ -249,7 +247,6 @@ private fun StatCard(
             .clip(RoundedCornerShape(14.dp))
             .background(Surface1)
             .border(1.dp, Border, RoundedCornerShape(14.dp))
-            // Reducimos padding horizontal de 12 a 8 para ganar espacio
             .padding(horizontal = 8.dp, vertical = 14.dp)
     ) {
         // Borde superior de acento
@@ -279,10 +276,9 @@ private fun StatCard(
             )
             Spacer(Modifier.height(4.dp))
 
-            // EL CAMBIO ESTÁ AQUÍ:
             Text(
                 text = value,
-                fontSize = 16.sp, // Bajamos de 18 a 16 para mayor compatibilidad
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextPrimary,
                 maxLines = 1,
@@ -297,7 +293,6 @@ private fun StatCard(
     }
 }
 
-// ─── Contenedor de gráfico ────────────────────────────────────────────────────
 @Composable
 private fun ChartCard(
     title: String,
@@ -384,7 +379,7 @@ private fun ChartCard(
     }
 }
 
-// ─── Pie chart con leyenda neon ───────────────────────────────────────────────
+// Pie chart
 @Composable
 fun NeonPieChart(data: Map<String, Float>, heightDp: Int = 260) {
     val colors = data.keys.mapIndexed { i, _ -> ChartColors[i % ChartColors.size] }
@@ -466,7 +461,7 @@ fun NeonPieChart(data: Map<String, Float>, heightDp: Int = 260) {
     }
 }
 
-// ─── Bar chart neon ───────────────────────────────────────────────────────────
+// Bar chart neon
 @Composable
 fun NeonBarChart(data: Map<String, Float>, heightDp: Int = 280) {
     val labels = data.keys.toList()
@@ -520,10 +515,16 @@ fun NeonBarChart(data: Map<String, Float>, heightDp: Int = 280) {
     )
 }
 
-// ─── Line chart neon ─────────────────────────────────────────────────────────
+// Line chart neon
 @Composable
 fun NeonLineChart(data: Map<String, Float>, heightDp: Int = 260) {
-    val labels = data.keys.sorted()
+    // Ordenamiento cronológico día/mes
+    val labels = data.keys.sortedWith(compareBy<String> {
+        it.split("/").getOrNull(1)?.toIntOrNull() ?: 0
+    }.thenBy {
+        it.split("/").getOrNull(0)?.toIntOrNull() ?: 0
+    })
+
     AndroidView(
         modifier = Modifier
             .fillMaxWidth()
@@ -531,17 +532,14 @@ fun NeonLineChart(data: Map<String, Float>, heightDp: Int = 260) {
         factory = { ctx ->
             LineChart(ctx).apply {
                 val entries = labels.mapIndexed { i, k -> Entry(i.toFloat(), data[k] ?: 0f) }
+
                 val ds = LineDataSet(entries, "").apply {
                     color             = android.graphics.Color.parseColor("#4FC3F7")
                     setCircleColor(android.graphics.Color.parseColor("#B57BEE"))
                     circleRadius      = 5f
                     circleHoleRadius  = 2.5f
                     lineWidth          = 2.5f
-
-                    // --- EL CAMBIO CRUCIAL ESTÁ AQUÍ ---
-                    setDrawValues(false) // Esto quita los números (12.1, 0.9, etc.)
-                    // -----------------------------------
-
+                    setDrawValues(false)
                     mode              = LineDataSet.Mode.CUBIC_BEZIER
                     setDrawFilled(true)
                     fillAlpha         = 40
@@ -554,10 +552,14 @@ fun NeonLineChart(data: Map<String, Float>, heightDp: Int = 260) {
                     valueFormatter  = IndexAxisValueFormatter(labels)
                     position        = com.github.mikephil.charting.components.XAxis.XAxisPosition.BOTTOM
                     granularity     = 1f
+                    labelCount      = labels.size
                     setDrawGridLines(false)
                     textColor       = android.graphics.Color.parseColor("#8892B0")
                     textSize        = 10f
                     typeface        = android.graphics.Typeface.DEFAULT_BOLD
+
+                    axisMinimum     = 0f
+                    axisMaximum     = (labels.size - 1).toFloat()
                 }
 
                 axisLeft.apply {
@@ -565,7 +567,12 @@ fun NeonLineChart(data: Map<String, Float>, heightDp: Int = 260) {
                     gridColor = android.graphics.Color.parseColor("#1E2330")
                     textColor = android.graphics.Color.parseColor("#8892B0")
                     textSize  = 10f
+
+                    // Fuerza a que el eje Y empiece exactamente en 0
+                    axisMinimum     = 0f
                 }
+
+                setExtraOffsets(0f, 0f, 10f, 10f)
 
                 axisRight.isEnabled   = false
                 setDrawGridBackground(false)
@@ -579,7 +586,6 @@ fun NeonLineChart(data: Map<String, Float>, heightDp: Int = 260) {
     )
 }
 
-// ─── Vistas expandidas (dentro del dialog) ────────────────────────────────────
 @Composable
 private fun ExpandedPie(data: Map<String, Float>) {
     Column {
@@ -613,7 +619,6 @@ private fun ExpandedLine(data: Map<String, Float>) {
     }
 }
 
-// ─── Fondo con puntos decorativos ─────────────────────────────────────────────
 @Composable
 private fun GridDotBackground() {
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
@@ -649,7 +654,7 @@ private fun GridDotBackground() {
     )
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// Helpers
 private fun formatMinutes(minutes: Float): String {
     val m = minutes.toInt()
     return if (m >= 60) "${m / 60}h ${m % 60}m" else "${m}m"
