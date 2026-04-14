@@ -19,14 +19,13 @@ object NotificationHelper {
     //    MODO_PRUEBA = true  → notifica cada 2 minutos
     //    MODO_PRUEBA = false → notifica cada 60 minutos (1 hora)
 
-    private const val MODO_PRUEBA = true
+    private const val MODO_PRUEBA = false
     private val THRESHOLD_MINUTES = if (MODO_PRUEBA) 2L else 60L
 
     private fun notifIdForUnit(unit: Int) = 100 + unit
 
-    // ─────────────────────────────────────────────────────────────
-    // Canal
-    // ─────────────────────────────────────────────────────────────
+
+
     fun createChannel(context: Context) {
         val channel = NotificationChannel(
             CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT
@@ -35,7 +34,6 @@ object NotificationHelper {
             .createNotificationChannel(channel)
     }
 
-    // ─────────────────────────────────────────────────────────────
     // Notificación de bienvenida (una sola vez)
 
     fun showWelcomeNotification(context: Context) {
@@ -61,7 +59,6 @@ object NotificationHelper {
         } catch (e: SecurityException) { e.printStackTrace() }
     }
 
-    // ─────────────────────────────────────────────────────────────
     // Check principal: llamar tras cada sync o refresh
 
     fun checkAndNotify(context: Context, totalSocialMinutes: Long) {
@@ -123,16 +120,12 @@ object NotificationHelper {
         } catch (e: SecurityException) { e.printStackTrace() }
     }
 
-    // ─────────────────────────────────────────────────────────────
     // Mensajes
-    // ─────────────────────────────────────────────────────────────
     private fun buildMessage(unit: Int, totalMinutes: Long): Pair<String, String> {
         return if (MODO_PRUEBA) {
-            // Mensajes de prueba (unidades de 2 min)
             "⏱️ ${totalMinutes} min en redes hoy" to
                     "Llevas $totalMinutes minutos en redes sociales. ¡Recuerda tus misiones en C The Habit! 💪"
         } else {
-            // Mensajes de producción (unidades = horas)
             val title = when (unit) {
                 1    -> "⏱️ 1 hora en redes sociales"
                 2    -> "📱 Ya llevas 2 horas en redes"
@@ -146,7 +139,7 @@ object NotificationHelper {
                 unit <= 3 ->
                     "Ya son $unit horas en redes. Tienes misiones esperándote en C The Habit, ¿qué tal si las revisas?"
                 else ->
-                    "¡$unit horas en redes hoy! Tus misiones en C The Habit siguen ahí. Es un buen momento para desconectarte. 💪"
+                    "¡$unit horas en redes hoy! Es un buen momento para desconectarte."
             }
             title to body
         }
