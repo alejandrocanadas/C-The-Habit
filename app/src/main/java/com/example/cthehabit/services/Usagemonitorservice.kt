@@ -35,7 +35,7 @@ class UsageMonitorService : Service() {
             context.stopService(Intent(context, UsageMonitorService::class.java))
         }
     }
-
+//revisar que el foregrpund dejarlo corriendo y a veces quitarlo
     override fun onCreate() {
         super.onCreate()
         createForegroundChannel()

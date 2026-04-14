@@ -26,6 +26,8 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.*
 import com.example.cthehabit.data.repositories.FirestoreRepository
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 enum class DayStatus {
     GOOD,
@@ -141,6 +143,16 @@ fun PantallaCalendario() {
         }
 
         dayStatusMap.value = statusMap
+        val rachaCalculada = calcularRachaDesdeAyer(statusMap)
+
+// LA GUARDAMOS EN LA BASE DE DATOS (Esto crea el campo si no existe)
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId != null) {
+            FirebaseFirestore.getInstance().collection("users")
+                .document(userId)
+                .update("racha", rachaCalculada) // Firestore creará el campo "racha" aquí
+        }
+
         weekHistory.value = history.sortedByDescending { it.date }
     }
 
@@ -413,4 +425,20 @@ fun LegendItem(color: Color, label: String) {
         )
         Text(text = label, fontSize = 12.sp)
     }
+}
+
+// Función lógica para contar días verdes seguidos desde ayer
+
+fun calcularRachaDesdeAyer(statusMap: Map<String, DayStatus>): Int {
+    var contador = 0
+    var fecha = LocalDate.now().minusDays(1) // Empezamos desde ayer
+
+    // La racha continúa si el día es GOOD o REGULAR
+    // Se detiene únicamente si es BAD o si no hay datos (NONE)
+    while (statusMap[fecha.toString()] == DayStatus.GOOD ||
+        statusMap[fecha.toString()] == DayStatus.REGULAR) {
+        contador++
+        fecha = fecha.minusDays(1)
+    }
+    return contador
 }

@@ -30,7 +30,7 @@ import com.example.cthehabit.data.model.Characters
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
-// --- FUNCIÓN DE RECORTE (Extraída de tu CharacterSelect) ---
+// --- FUNCIÓN DE RECORTE ---
 private fun decodeFirstFrame(context: Context, resId: Int, frameCount: Int): Bitmap {
     val sheet = BitmapFactory.decodeResource(context.resources, resId)
     val frameWidth = sheet.width / frameCount
@@ -39,7 +39,7 @@ private fun decodeFirstFrame(context: Context, resId: Int, frameCount: Int): Bit
     return frameBitmap
 }
 
-// Colores del tema (Tus colores originales)
+// Colores del tema
 private val BgDark       = Color(0xFF0D0D1A)
 private val BgCard       = Color(0xFF16162A)
 private val BgCardLocked = Color(0xFF0F0F1C)
@@ -49,22 +49,29 @@ private val AccentRed    = Color(0xFFCC2936)
 private val TextMuted    = Color(0xFF6B6B8A)
 
 @Composable
-fun SalonDeTrofeos(
-    onBack: () -> Unit
-) {
-    val context = LocalContext.current // Necesario para el decode
+fun SalonDeTrofeos() {
+    val context = LocalContext.current
     val userId = FirebaseAuth.getInstance().currentUser?.uid
     var nivelActual by remember { mutableStateOf(1) }
     var rachaActual by remember { mutableStateOf(0) }
 
-    LaunchedEffect(Unit) {
-        if (userId != null) {
-            FirebaseFirestore.getInstance().collection("users")
-                .document(userId).get()
-                .addOnSuccessListener { doc ->
-                    nivelActual = doc.getLong("currentLevel")?.toInt() ?: 1
-                    rachaActual = doc.getLong("racha")?.toInt() ?: 0
+
+    // Cambiamos LaunchedEffect por DisposableEffect por mejoirar rendimiento y carga del numero racha
+    DisposableEffect(userId) {
+        if (userId == null) return@DisposableEffect onDispose {}
+
+        val registration = FirebaseFirestore.getInstance().collection("users")
+            .document(userId)
+            .addSnapshotListener { snapshot, _ ->
+                if (snapshot != null && snapshot.exists()) {
+                    nivelActual = snapshot.getLong("currentLevel")?.toInt() ?: 1
+                    rachaActual = snapshot.getLong("racha")?.toInt() ?: 0
                 }
+            }
+
+        // Aquí es donde USAMOS la variable para cerrar la conexión al salir
+        onDispose {
+            registration.remove()
         }
     }
 
@@ -83,6 +90,7 @@ fun SalonDeTrofeos(
     var selectedTab by remember { mutableStateOf(0) }
 
     Box(modifier = Modifier.fillMaxSize().background(BgDark)) {
+        // Fondo de estrellas
         Canvas(modifier = Modifier.fillMaxSize()) {
             val starPositions = listOf(
                 Offset(50f, 120f), Offset(300f, 80f), Offset(500f, 200f),
@@ -93,28 +101,44 @@ fun SalonDeTrofeos(
             starPositions.forEach { pos ->
                 drawCircle(color = Color.White.copy(alpha = 0.15f), radius = 2f, center = pos)
             }
-            drawLine(
-                brush = Brush.horizontalGradient(listOf(Color.Transparent, Gold.copy(alpha = 0.5f), Color.Transparent)),
-                start = Offset(0f, 0f), end = Offset(size.width, 0f), strokeWidth = 2f
-            )
         }
 
         Column(modifier = Modifier.fillMaxSize()) {
-            // HEADER
-            Box(modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 8.dp)) {
-                IconButton(onClick = onBack, modifier = Modifier.align(Alignment.CenterStart).padding(start = 8.dp)) {
-                    Text("←", fontSize = 24.sp, color = Gold)
-                }
-                Column(modifier = Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = "⚔  SALÓN DE TROFEOS  ⚔", fontSize = 18.sp, fontWeight = FontWeight.Black, color = Gold, letterSpacing = 2.sp)
-                    Text(text = "Nivel alcanzado: $nivelActual", fontSize = 12.sp, color = TextMuted, letterSpacing = 1.sp)
+            // HEADER (Sin flecha de retroceso)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 24.dp, bottom = 12.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "⚔  SALÓN DE TROFEOS  ⚔",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Gold,
+                        letterSpacing = 2.sp
+                    )
+                    Text(
+                        text = "Nivel alcanzado: $nivelActual",
+                        fontSize = 12.sp,
+                        color = TextMuted,
+                        letterSpacing = 1.sp
+                    )
                 }
             }
 
             // CONTADOR DE RACHA
-            Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp).clip(RoundedCornerShape(16.dp))
+            Box(modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 8.dp)
+                .clip(RoundedCornerShape(16.dp))
                 .background(Brush.horizontalGradient(listOf(Color(0xFF1A1A2E), Color(0xFF16213E), Color(0xFF1A1A2E))))
-                .border(width = 1.dp, brush = Brush.horizontalGradient(listOf(GoldDark.copy(alpha = glowAlpha), Gold.copy(alpha = glowAlpha), GoldDark.copy(alpha = glowAlpha))), shape = RoundedCornerShape(16.dp))
+                .border(
+                    width = 1.dp,
+                    brush = Brush.horizontalGradient(listOf(GoldDark.copy(alpha = glowAlpha), Gold.copy(alpha = glowAlpha), GoldDark.copy(alpha = glowAlpha))),
+                    shape = RoundedCornerShape(16.dp)
+                )
                 .padding(horizontal = 24.dp, vertical = 14.dp)
             ) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -134,7 +158,7 @@ fun SalonDeTrofeos(
                 listOf("⚔ Héroes ($jugadoresDesbloqueados/${Characters.PLAYERS.size})", "💀 Enemigos ($enemigosDesbloqueados/${Characters.ENEMIES.size})").forEachIndexed { index, label ->
                     Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(12.dp))
                         .background(if (selectedTab == index) Brush.horizontalGradient(listOf(GoldDark, Gold.copy(alpha = 0.8f))) else Brush.horizontalGradient(listOf(Color.Transparent, Color.Transparent)))
-                        .clickable { selectedTab = index }.padding(vertical = 10.dp), contentAlignment = Alignment.Center
+                        .clickable { selectedTab = index }.padding(vertical = 12.dp), contentAlignment = Alignment.Center
                     ) {
                         Text(text = label, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = if (selectedTab == index) Color.Black else TextMuted, textAlign = TextAlign.Center)
                     }
@@ -154,15 +178,13 @@ fun SalonDeTrofeos(
             ) {
                 itemsIndexed(list) { index, character ->
                     val unlocked = index < unlockedCount
-
-                    // --- RECORTE DE FRAME ---
                     val bitmapPreview = remember(character.idleRes) {
                         decodeFirstFrame(context, character.idleRes, character.idleFrames)
                     }
 
                     TrofeoCard(
                         name = character.name,
-                        bitmap = bitmapPreview, // Cambiamos idleRes por bitmap
+                        bitmap = bitmapPreview,
                         unlocked = unlocked,
                         isEnemy = selectedTab == 1,
                         index = index
@@ -176,7 +198,7 @@ fun SalonDeTrofeos(
 @Composable
 private fun TrofeoCard(
     name: String,
-    bitmap: Bitmap, // Cambiado de idleRes: Int
+    bitmap: Bitmap,
     unlocked: Boolean,
     isEnemy: Boolean,
     index: Int
@@ -196,11 +218,10 @@ private fun TrofeoCard(
         Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
             Box(modifier = Modifier.fillMaxWidth().weight(1f).padding(top = 12.dp, start = 12.dp, end = 12.dp), contentAlignment = Alignment.Center) {
 
-                // --- IMAGEN USANDO BITMAP RECORTE ---
                 Image(
-                    bitmap = bitmap.asImageBitmap(), // Usamos el bitmap procesado
+                    bitmap = bitmap.asImageBitmap(),
                     contentDescription = name,
-                    filterQuality = FilterQuality.None, // Mantiene el Pixel Art nítido
+                    filterQuality = FilterQuality.None,
                     contentScale = ContentScale.Fit,
                     modifier = Modifier.fillMaxSize()
                         .then(if (!unlocked) Modifier.alpha(0.15f).blur(2.dp) else Modifier)

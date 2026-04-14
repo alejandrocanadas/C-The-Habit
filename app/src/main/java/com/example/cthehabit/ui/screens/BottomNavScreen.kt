@@ -128,7 +128,7 @@ fun BottomNavScreen(
 
             // PESTAÑA 4: TROFEOS
             composable(BottomNavDestination.Trofeos.route) {
-                SalonDeTrofeos(onBack = { innerNavController.popBackStack() })
+                SalonDeTrofeos()
             }
 
             // PESTAÑA 5: PERFIL
