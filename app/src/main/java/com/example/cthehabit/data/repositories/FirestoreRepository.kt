@@ -148,7 +148,14 @@ class FirestoreRepository {
             nivelActual++
         }
 
-        docRef.update(mapOf("xp" to xpActual, "currentLevel" to nivelActual)).await()
+        docRef.set(
+            mapOf(
+                "xp" to xpActual,
+                "currentLevel" to nivelActual
+            ),
+            com.google.firebase.firestore.SetOptions.merge()
+        ).await()
+
         Result.success(Unit)
     } catch (e: Exception) {
         Result.failure(e)

@@ -36,6 +36,7 @@ import com.example.cthehabit.utils.getTodayDate
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.AlertDialog
 import com.example.cthehabit.utils.DailyMissionPlanner
 import com.example.cthehabit.utils.MissionGenerator
 
@@ -46,6 +47,8 @@ fun PantallaPrincipalMisiones(onBack: () -> Unit) {
 
     var missions by remember { mutableStateOf<List<UserMission>>(emptyList()) }
 
+    var showXp by remember { mutableStateOf(false) }
+    var xpGanada by remember { mutableStateOf(0) }
 
     LaunchedEffect(Unit) {
         val today = getTodayDate()
@@ -110,9 +113,14 @@ fun PantallaPrincipalMisiones(onBack: () -> Unit) {
                     mission = mission,
                     onComplete = {
                         scope.launch {
-                            firestoreRepository.completeMission(mission.id)
-                            firestoreRepository.addXpToUser(50)
-                            missions = missions.filter { it.id != mission.id }
+                            val completeResult = firestoreRepository.completeMission(mission.id)
+                            val xpResult = firestoreRepository.addXpToUser(50)
+
+                            if (completeResult.isSuccess && xpResult.isSuccess) {
+                                xpGanada = 50
+                                showXp = true
+                                missions = missions.filter { it.id != mission.id }
+                            }
                         }
                     },
                     onCancel = {
@@ -142,6 +150,35 @@ fun PantallaPrincipalMisiones(onBack: () -> Unit) {
                 onClick = onBack
             ) {
                 Text("Volver")
+            }
+        }
+    }
+
+    if (showXp) {
+
+        // Esto hace que desaparezca después de 2 segundos
+        LaunchedEffect(Unit) {
+            kotlinx.coroutines.delay(2000)
+            showXp = false
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Card(
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1C2C)),
+                elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
+            ) {
+                Text(
+                    text = " +$xpGanada XP",
+                    modifier = Modifier.padding(horizontal = 30.dp, vertical = 20.dp),
+                    color = Color(0xFFFFD700),
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }
