@@ -220,11 +220,11 @@ fun AppNavHost(
                 horas = horas,
                 playerIndex = player,
                 enemyIndex = enemy,
-                onSiguienteClick = {
+                /*onSiguienteClick = {
                     navController.navigate("main") {
                         popUpTo("main") { inclusive = true }
                     }
-                },
+                },*/
                 onOpenCharacterSelect = {
                     navController.navigate("characterSelect/$horas/$enemy")
                 },

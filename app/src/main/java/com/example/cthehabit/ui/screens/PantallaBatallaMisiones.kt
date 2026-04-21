@@ -27,49 +27,59 @@ fun PantallaBatallaMisiones(
 ) {
     BackHandler { onBack() }
 
-    Scaffold(containerColor = Color.DarkGray) { innerPadding ->
-        Column(
+    // Usamos Column para que el juego y el botón estén en compartimentos separados
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF0D0E14)) // Color oscuro para que coincida con el juego
+    ) {
+        // 1. EL JUEGO (Ocupa todo lo que puede arriba)
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .background(Color.DarkGray)
+                .weight(1f) // Esto empuja al botón hacia abajo
+                .fillMaxWidth()
         ) {
-            BattleSection(
+            GameScreen(
                 horas = horas,
                 playerIndex = playerIndex,
                 enemyIndex = enemyIndex,
+                onBackToMain = onBack,
                 onOpenCharacterSelect = onOpenCharacterSelect,
                 onOpenTrophies = onOpenTrophies
             )
+        }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
+        // 2. EL ÁREA DEL BOTÓN (Abajo del todo)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 24.dp), // Espaciado para que no toque el borde
+            contentAlignment = Alignment.Center
+        ) {
             Button(
                 onClick = onOpenMissions,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
-                    .height(56.dp),
+                    .fillMaxWidth(0.85f)
+                    .height(58.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF1E3A5F)
                 ),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp)
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
             ) {
                 Icon(
                     imageVector = Icons.Filled.Star,
                     contentDescription = null,
                     tint = Color(0xFFFFD700),
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(22.dp)
                 )
-                Spacer(modifier = Modifier.width(10.dp))
+                Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     text = "Ver misiones",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.ExtraBold,
                     color = Color.White
                 )
-
             }
         }
     }
