@@ -109,19 +109,29 @@ fun BottomNavScreen(
 
             // PESTAÑA 3: JUEGO (Pantalla Principal con lógica de nivel y sync)
             composable(BottomNavDestination.Juego.route) {
+
+                val usageData by usageViewModel.usageData
+
+                val horasHoy = remember(usageData) {
+                    val today = SimpleDateFormat("d/M", Locale.getDefault()).format(Date())
+                    val todayMap = usageData[today] ?: emptyMap()
+                    val totalMs = todayMap.values.sum()
+                    (totalMs / (1000L * 60 * 60)).toInt()
+                }
+
                 PantallaBatallaMisiones(
-                    horas = 5,
+                    horas = horasHoy,
                     playerIndex = 0,
                     enemyIndex = 0,
                     onBack = {},
                     onOpenCharacterSelect = {
-                        innerNavController.navigate("character_select_interno/5/0")
+                        innerNavController.navigate("character_select_interno/$horasHoy/0")
                     },
                     onOpenTrophies = {
                         innerNavController.navigate(BottomNavDestination.Trofeos.route)
                     },
                     onOpenMissions = {
-                        innerNavController.navigate("misiones_internas") // 👈
+                        innerNavController.navigate("misiones_internas")
                     }
                 )
             }

@@ -3,16 +3,12 @@ package com.example.cthehabit.ui.screens
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
@@ -21,25 +17,73 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cthehabit.data.model.GameCharacter
+import com.example.cthehabit.data.model.HabitType
 import com.example.cthehabit.ui.game.CharacterComponent
 import com.example.cthehabit.ui.game.CharacterState
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
-private val BgDark       = Color(0xFF0D0D1A)
-private val BgCard       = Color(0xFF16162A)
-private val BgCardLocked = Color(0xFF0F0F1C)
-private val Gold         = Color(0xFFFFD700)
-private val GoldDark     = Color(0xFFB8860B)
-private val AccentRed    = Color(0xFFCC2936)
-private val TextMuted    = Color(0xFF6B6B8A)
+private val BgDark    = Color(0xFF0D0D1A)
+private val BgCard    = Color(0xFF16162A)
+private val Gold      = Color(0xFFFFD700)
+private val GoldDark  = Color(0xFFB8860B)
+private val AccentRed = Color(0xFFCC2936)
+private val AccentBlue = Color(0xFF4FC3F7)
+private val TextMuted = Color(0xFF6B6B8A)
+
+private fun colorForHabit(type: HabitType?) = when (type) {
+    HabitType.TIEMPO_RED -> AccentRed
+    HabitType.MISIONES   -> AccentBlue
+    HabitType.RACHA      -> Gold
+    else                 -> TextMuted
+}
+
+private fun iconForHabit(type: HabitType?) = when (type) {
+    HabitType.TIEMPO_RED -> "📱"
+    HabitType.MISIONES   -> "📋"
+    HabitType.RACHA      -> "🔥"
+    else                 -> "❓"
+}
+
+private fun labelForHabit(type: HabitType?) = when (type) {
+    HabitType.TIEMPO_RED -> "Tiempo en pantalla"
+    HabitType.MISIONES   -> "Misiones diarias"
+    HabitType.RACHA      -> "Racha de días"
+    else                 -> "Otros"
+}
+
+private fun condicionEnemigo(character: GameCharacter): String {
+    val dif = character.config.dificultad
+    return when (character.config.habitType) {
+        HabitType.TIEMPO_RED -> when {
+            dif <= 1 -> "Aparece con ≥ 1h de pantalla"
+            dif <= 2 -> "Aparece con ≥ 3h de pantalla"
+            dif <= 3 -> "Aparece con ≥ 5h de pantalla"
+            else     -> "Aparece con ≥ 6h de pantalla"
+        }
+        HabitType.MISIONES -> when {
+            dif <= 1 -> "Aparece si tienes misiones"
+            dif <= 2 -> "Aparece si fallas 1+ misión"
+            else     -> "Aparece si fallas 3+ misiones"
+        }
+        HabitType.RACHA -> when {
+            dif <= 3 -> "Aparece con racha ≥ 1 día"
+            dif <= 5 -> "Aparece con racha ≥ 3 días"
+            else     -> "Aparece con racha ≥ 7 días"
+        }
+        else -> ""
+    }
+}
 
 @Composable
 fun SalonDeTrofeos() {
 
-    // Listas desde GameCharacter — sin Characters.PLAYERS / ENEMIES
     val players = remember { GameCharacter.PLAYERS }
-    val enemies = remember { GameCharacter.ENEMIES }
+    val enemiesByHabit = remember {
+        GameCharacter.ENEMIES
+            .groupBy { it.config.habitType ?: HabitType.TIEMPO_RED }
+            .mapValues { (_, list) -> list.sortedBy { it.config.dificultad } }
+    }
 
     val userId = FirebaseAuth.getInstance().currentUser?.uid
     var nivelActual by remember { mutableStateOf(1) }
@@ -59,7 +103,6 @@ fun SalonDeTrofeos() {
     }
 
     val jugadoresDesbloqueados = minOf(1 + (nivelActual - 1) / 3, players.size)
-    val enemigosDesbloqueados  = minOf((nivelActual - 1) / 3 + 1, enemies.size)
 
     val pulseAnim = rememberInfiniteTransition(label = "pulse")
     val glowAlpha by pulseAnim.animateFloat(
@@ -87,7 +130,7 @@ fun SalonDeTrofeos() {
 
         Column(modifier = Modifier.fillMaxSize()) {
 
-            // Header
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -96,20 +139,17 @@ fun SalonDeTrofeos() {
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text          = "⚔  SALÓN DE TROFEOS  ⚔",
-                        fontSize      = 18.sp,
-                        fontWeight    = FontWeight.Black,
-                        color         = Gold,
-                        letterSpacing = 2.sp
+                        "⚔  SALÓN DE TROFEOS  ⚔",
+                        fontSize = 18.sp, fontWeight = FontWeight.Black,
+                        color = Gold, letterSpacing = 2.sp
                     )
                     Text(
-                        text          = "Nivel alcanzado: $nivelActual",
-                        fontSize      = 12.sp,
-                        color         = TextMuted,
-                        letterSpacing = 1.sp
+                        "Nivel alcanzado: $nivelActual",
+                        fontSize = 12.sp, color = TextMuted, letterSpacing = 1.sp
                     )
                 }
             }
+
 
             Box(
                 modifier = Modifier
@@ -135,30 +175,29 @@ fun SalonDeTrofeos() {
                     .padding(horizontal = 24.dp, vertical = 14.dp)
             ) {
                 Row(
-                    modifier              = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment     = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
                         Text(
-                            text = "RACHA ACTUAL", fontSize = 10.sp,
+                            "RACHA ACTUAL", fontSize = 10.sp,
                             color = TextMuted, letterSpacing = 2.sp, fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text       = "🔥  $rachaActual días",
-                            fontSize   = 28.sp,
-                            fontWeight = FontWeight.Black,
-                            color      = if (rachaActual > 0) Gold else TextMuted
+                            "🔥  $rachaActual días",
+                            fontSize = 28.sp, fontWeight = FontWeight.Black,
+                            color = if (rachaActual > 0) Gold else TextMuted
                         )
                     }
                     Column(horizontalAlignment = Alignment.End) {
-                        Text(text = "Actualiza cada día", fontSize = 10.sp, color = TextMuted, textAlign = TextAlign.End)
-                        Text(text = "según tus misiones",  fontSize = 10.sp, color = TextMuted, textAlign = TextAlign.End)
+                        Text("Actualiza cada día", fontSize = 10.sp, color = TextMuted, textAlign = TextAlign.End)
+                        Text("según tus misiones", fontSize = 10.sp, color = TextMuted, textAlign = TextAlign.End)
                     }
                 }
             }
 
-            // Tabs
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -168,7 +207,7 @@ fun SalonDeTrofeos() {
             ) {
                 listOf(
                     "⚔ Héroes ($jugadoresDesbloqueados/${players.size})",
-                    "💀 Enemigos ($enemigosDesbloqueados/${enemies.size})"
+                    "💀 Enemigos (${GameCharacter.ENEMIES.size})"
                 ).forEachIndexed { index, label ->
                     Box(
                         modifier = Modifier
@@ -185,33 +224,112 @@ fun SalonDeTrofeos() {
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text       = label,
-                            fontSize   = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            color      = if (selectedTab == index) Color.Black else TextMuted,
-                            textAlign  = TextAlign.Center
+                            text = label, fontSize = 12.sp, fontWeight = FontWeight.Bold,
+                            color = if (selectedTab == index) Color.Black else TextMuted,
+                            textAlign = TextAlign.Center
                         )
                     }
                 }
             }
 
-            val list          = if (selectedTab == 0) players else enemies
-            val unlockedCount = if (selectedTab == 0) jugadoresDesbloqueados else enemigosDesbloqueados
 
-            LazyVerticalGrid(
-                columns               = GridCells.Fixed(2),
-                modifier              = Modifier.fillMaxSize().padding(horizontal = 12.dp),
-                contentPadding        = PaddingValues(bottom = 24.dp, top = 4.dp),
-                verticalArrangement   = Arrangement.spacedBy(12.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                itemsIndexed(list) { index, character ->
-                    TrofeoCard(
-                        character = character,
-                        unlocked  = index < unlockedCount,
-                        isEnemy   = selectedTab == 1,
-                        index     = index
+            if (selectedTab == 0) {
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
+                    contentPadding = PaddingValues(bottom = 24.dp, top = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+
+                    val rows = players.chunked(2)
+                    items(rows.size) { rowIndex ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            rows[rowIndex].forEachIndexed { colIndex, character ->
+                                val globalIndex = rowIndex * 2 + colIndex
+                                val unlocked = globalIndex < jugadoresDesbloqueados
+                                Box(modifier = Modifier.weight(1f)) {
+                                    HeroeCard(
+                                        character = character,
+                                        unlocked  = unlocked,
+                                        lockText  = "Sube al nivel ${globalIndex * 3 + 1}"
+                                    )
+                                }
+                            }
+                            if (rows[rowIndex].size == 1) Spacer(Modifier.weight(1f))
+                        }
+                    }
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
+                    contentPadding = PaddingValues(bottom = 24.dp, top = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    val habitOrder = listOf(
+                        HabitType.TIEMPO_RED,
+                        HabitType.MISIONES,
+                        HabitType.RACHA
                     )
+
+                    habitOrder.forEach { habitType ->
+                        val grupoEnemigos = enemiesByHabit[habitType] ?: return@forEach
+                        val color = colorForHabit(habitType)
+
+                        item {
+                            Column(modifier = Modifier.fillMaxWidth()) {
+
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
+                                        .background(color.copy(alpha = 0.18f))
+                                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(iconForHabit(habitType), fontSize = 20.sp)
+                                        Spacer(Modifier.width(8.dp))
+                                        Text(
+                                            labelForHabit(habitType),
+                                            fontSize = 15.sp,
+                                            fontWeight = FontWeight.Black,
+                                            color = color
+                                        )
+                                    }
+                                    val minDif = grupoEnemigos.minOf { it.config.dificultad }
+                                    val maxDif = grupoEnemigos.maxOf { it.config.dificultad }
+                                    Text(
+                                        "⚡ $minDif – $maxDif",
+                                        fontSize = 12.sp,
+                                        color = color.copy(alpha = 0.8f),
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+
+                                Spacer(Modifier.height(8.dp))
+
+                                val rows = grupoEnemigos.chunked(2)
+                                rows.forEach { fila ->
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                    ) {
+                                        fila.forEach { character ->
+                                            Box(modifier = Modifier.weight(1f)) {
+                                                EnemyCard(character = character)
+                                            }
+                                        }
+                                        if (fila.size == 1) Spacer(Modifier.weight(1f))
+                                    }
+                                    Spacer(Modifier.height(10.dp))
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -219,104 +337,149 @@ fun SalonDeTrofeos() {
 }
 
 @Composable
-private fun TrofeoCard(
+private fun HeroeCard(
     character : GameCharacter,
     unlocked  : Boolean,
-    isEnemy   : Boolean,
-    index     : Int
+    lockText  : String
 ) {
-    val borderBrush = if (unlocked) {
-        if (isEnemy) Brush.linearGradient(listOf(AccentRed, Color(0xFF8B0000)))
-        else         Brush.linearGradient(listOf(GoldDark, Gold))
-    } else {
-        Brush.linearGradient(listOf(TextMuted.copy(alpha = 0.2f), TextMuted.copy(alpha = 0.1f)))
-    }
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(180.dp)
+            .height(200.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(if (unlocked) BgCard else BgCardLocked)
-            .border(width = 1.5.dp, brush = borderBrush, shape = RoundedCornerShape(16.dp))
+            .background(BgCard)
+            .border(
+                width = 1.5.dp,
+                brush = if (unlocked)
+                    Brush.linearGradient(listOf(GoldDark, Gold))
+                else
+                    Brush.linearGradient(listOf(TextMuted.copy(0.2f), TextMuted.copy(0.1f))),
+                shape = RoundedCornerShape(16.dp)
+            )
     ) {
         Column(
-            modifier            = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-            // Zona del sprite
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .padding(top = 12.dp, start = 12.dp, end = 12.dp),
+                    .padding(8.dp),
                 contentAlignment = Alignment.Center
             ) {
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .then(
-                            if (!unlocked) Modifier.alpha(0.15f).blur(2.dp) else Modifier
-                        )
-                ) {
-                    CharacterComponent(
-                        modifier    = Modifier.fillMaxSize(),
-                        character   = character,
-                        spriteState = CharacterState.IDLE
-                    )
-                }
-
+                CharacterComponent(
+                    modifier    = Modifier.fillMaxSize(),
+                    character   = character,
+                    spriteState = CharacterState.IDLE
+                )
                 if (!unlocked) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(text = "🔒", fontSize = 32.sp)
-                        Text(
-                            text       = if (isEnemy) "Derrota más\nenemigos"
-                            else         "Sube al\nnivel ${index * 3 + 1}",
-                            fontSize   = 10.sp,
-                            color      = TextMuted,
-                            textAlign  = TextAlign.Center,
-                            lineHeight = 14.sp
-                        )
-                    }
-                }
-
-                if (unlocked) {
                     Box(
                         modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .clip(RoundedCornerShape(bottomStart = 8.dp))
-                            .background(if (isEnemy) AccentRed else Gold)
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.55f)),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text(text = if (isEnemy) "💀" else "⚔", fontSize = 10.sp)
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("🔒", fontSize = 28.sp)
+                            Text(
+                                lockText, fontSize = 10.sp, color = TextMuted,
+                                textAlign = TextAlign.Center, lineHeight = 14.sp
+                            )
+                        }
                     }
                 }
             }
-
-            // Nombre
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(
-                        if (unlocked)
-                            if (isEnemy) Color(0x33CC2936) else Color(0x33FFD700)
-                        else Color(0x11FFFFFF)
-                    )
-                    .padding(vertical = 8.dp, horizontal = 8.dp),
+                    .background(Gold.copy(alpha = if (unlocked) 0.18f else 0.05f))
+                    .padding(vertical = 7.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text       = if (unlocked) character.name else "???",
-                    fontSize   = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    color      = if (unlocked) (if (isEnemy) AccentRed else Gold) else TextMuted,
-                    textAlign  = TextAlign.Center,
-                    maxLines   = 1
+                    if (unlocked) character.name else "???",
+                    fontSize = 12.sp, fontWeight = FontWeight.Bold,
+                    color = if (unlocked) Gold else TextMuted,
+                    textAlign = TextAlign.Center, maxLines = 1
+                )
+            }
+        }
+    }
+}
+
+
+@Composable
+private fun EnemyCard(character: GameCharacter) {
+    val color = colorForHabit(character.config.habitType)
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(BgCard)
+            .border(
+                width = 1.5.dp,
+                brush = Brush.linearGradient(listOf(color.copy(0.5f), color)),
+                shape = RoundedCornerShape(16.dp)
+            )
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(130.dp)
+                    .padding(8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                CharacterComponent(
+                    modifier    = Modifier.fillMaxSize(),
+                    character   = character,
+                    spriteState = CharacterState.IDLE
+                )
+                // Insignia de dificultad (esquina superior derecha)
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .clip(RoundedCornerShape(bottomStart = 8.dp))
+                        .background(color.copy(alpha = 0.85f))
+                        .padding(horizontal = 5.dp, vertical = 2.dp)
+                ) {
+                    Text(
+                        "⚡ ${character.config.dificultad}",
+                        fontSize = 9.sp, color = Color.Black, fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(color.copy(alpha = 0.18f))
+                    .padding(vertical = 5.dp, horizontal = 8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    character.name,
+                    fontSize = 12.sp, fontWeight = FontWeight.Bold,
+                    color = color, textAlign = TextAlign.Center, maxLines = 1
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(color.copy(alpha = 0.06f))
+                    .padding(vertical = 5.dp, horizontal = 8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    condicionEnemigo(character),
+                    fontSize = 9.sp, color = TextMuted,
+                    textAlign = TextAlign.Center, lineHeight = 13.sp
                 )
             }
         }

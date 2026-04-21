@@ -23,5 +23,13 @@ data class CharacterConfig(
     val attacks: List<CharacterAttack>,
     val hurtPos: Int, val hurtFrames: Int,
     val deathPos: Int, val deathFrames: Int,
-    val type: CharacterType = CharacterType.PLAYER
+    val type: CharacterType = CharacterType.PLAYER,
+    val habitType: HabitType? = null,
+    val dificultad: Int = 1
 )
+
+enum class HabitType {
+    TIEMPO_RED,
+    MISIONES,
+    RACHA
+}

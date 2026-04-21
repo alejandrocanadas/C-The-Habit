@@ -113,7 +113,9 @@ enum class GameCharacter(val config: CharacterConfig) {
         attacks = listOf(CharacterAttack(2, 6), CharacterAttack(3, 8), CharacterAttack(4, 8)),
         hurtPos = 6, hurtFrames = 4,
         deathPos = 7, deathFrames = 4,
-        type = CharacterType.ENEMY
+        type = CharacterType.ENEMY,
+        habitType = HabitType.TIEMPO_RED,
+        dificultad = 1
     )),
 
     ARMORED_SKELETON(CharacterConfig(
@@ -123,7 +125,9 @@ enum class GameCharacter(val config: CharacterConfig) {
         attacks = listOf(CharacterAttack(2, 8), CharacterAttack(3, 8)),
         hurtPos = 4, hurtFrames = 4,
         deathPos = 5, deathFrames = 4,
-        type = CharacterType.ENEMY
+        type = CharacterType.ENEMY,
+        habitType = HabitType.MISIONES,
+        dificultad = 1
     )),
 
     ELITE_ORC(CharacterConfig(
@@ -133,7 +137,9 @@ enum class GameCharacter(val config: CharacterConfig) {
         attacks = listOf(CharacterAttack(2, 6), CharacterAttack(3, 10), CharacterAttack(4, 8)),
         hurtPos = 5, hurtFrames = 4,
         deathPos = 6, deathFrames = 4,
-        type = CharacterType.ENEMY
+        type = CharacterType.ENEMY,
+        habitType = HabitType.TIEMPO_RED,
+        dificultad = 3
     )),
 
     GREATSWORD_SKELETON(CharacterConfig(
@@ -143,7 +149,9 @@ enum class GameCharacter(val config: CharacterConfig) {
         attacks = listOf(CharacterAttack(2, 8), CharacterAttack(3, 12), CharacterAttack(4, 8)),
         hurtPos = 5, hurtFrames = 4,
         deathPos = 6, deathFrames = 4,
-        type = CharacterType.ENEMY
+        type = CharacterType.ENEMY,
+        habitType = HabitType.MISIONES,
+        dificultad = 4
     )),
 
     ORC(CharacterConfig(
@@ -153,7 +161,9 @@ enum class GameCharacter(val config: CharacterConfig) {
         attacks = listOf(CharacterAttack(2, 6), CharacterAttack(3, 6)),
         hurtPos = 4, hurtFrames = 4,
         deathPos = 5, deathFrames = 4,
-        type = CharacterType.ENEMY
+        type = CharacterType.ENEMY,
+        habitType = HabitType.TIEMPO_RED,
+        dificultad = 2
     )),
 
     ORC_RIDER(CharacterConfig(
@@ -163,7 +173,9 @@ enum class GameCharacter(val config: CharacterConfig) {
         attacks = listOf(CharacterAttack(2, 8), CharacterAttack(3, 8), CharacterAttack(4, 10)),
         hurtPos = 6, hurtFrames = 4,
         deathPos = 7, deathFrames = 4,
-        type = CharacterType.ENEMY
+        type = CharacterType.ENEMY,
+        habitType = HabitType.RACHA,
+        dificultad = 5
     )),
 
     SKELETON(CharacterConfig(
@@ -173,7 +185,9 @@ enum class GameCharacter(val config: CharacterConfig) {
         attacks = listOf(CharacterAttack(2, 6), CharacterAttack(3, 6)),
         hurtPos = 5, hurtFrames = 4,
         deathPos = 6, deathFrames = 4,
-        type = CharacterType.ENEMY
+        type = CharacterType.ENEMY,
+        habitType = HabitType.MISIONES,
+        dificultad = 2
     )),
 
     SKELETON_ARCHER(CharacterConfig(
@@ -183,7 +197,9 @@ enum class GameCharacter(val config: CharacterConfig) {
         attacks = listOf(CharacterAttack(2, 8)),
         hurtPos = 3, hurtFrames = 4,
         deathPos = 4, deathFrames = 4,
-        type = CharacterType.ENEMY
+        type = CharacterType.ENEMY,
+        habitType = HabitType.RACHA,
+        dificultad = 3
     )),
 
     WEREWOLF(CharacterConfig(
@@ -193,7 +209,9 @@ enum class GameCharacter(val config: CharacterConfig) {
         attacks = listOf(CharacterAttack(2, 8), CharacterAttack(3, 12)),
         hurtPos = 4, hurtFrames = 4,
         deathPos = 5, deathFrames = 4,
-        type = CharacterType.ENEMY
+        type = CharacterType.ENEMY,
+        habitType = HabitType.TIEMPO_RED,
+        dificultad = 6
     )),
 
     WEREBEAR(CharacterConfig(
@@ -203,7 +221,9 @@ enum class GameCharacter(val config: CharacterConfig) {
         attacks = listOf(CharacterAttack(2, 8), CharacterAttack(3, 12), CharacterAttack(4, 8)),
         hurtPos = 5, hurtFrames = 4,
         deathPos = 6, deathFrames = 4,
-        type = CharacterType.ENEMY
+        type = CharacterType.ENEMY,
+        habitType = HabitType.RACHA,
+        dificultad = 7
     ));
 
     companion object {
