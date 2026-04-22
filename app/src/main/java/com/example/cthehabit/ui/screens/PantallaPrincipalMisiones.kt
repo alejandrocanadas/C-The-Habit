@@ -39,6 +39,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.AlertDialog
 import com.example.cthehabit.utils.DailyMissionPlanner
 import com.example.cthehabit.utils.MissionGenerator
+import androidx.compose.ui.res.stringResource
+import com.example.cthehabit.R
 
 @Composable
 fun PantallaPrincipalMisiones(onBack: () -> Unit) {
@@ -102,7 +104,7 @@ fun PantallaPrincipalMisiones(onBack: () -> Unit) {
             Spacer(modifier = Modifier.height(40.dp))
 
             Text(
-                text = "Misiones de Hoy",
+                text = stringResource(R.string.misiones_hoy),
                 style = MaterialTheme.typography.headlineMedium
             )
 
@@ -139,7 +141,7 @@ fun PantallaPrincipalMisiones(onBack: () -> Unit) {
                 Spacer(modifier = Modifier.height(30.dp))
 
                 Text(
-                    text = "No hay más misiones para el día de hoy",
+                    text = stringResource(R.string.no_hay_misiones),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold,
                     color = Color.Gray
@@ -149,7 +151,7 @@ fun PantallaPrincipalMisiones(onBack: () -> Unit) {
             Button(
                 onClick = onBack
             ) {
-                Text("Volver")
+                Text(stringResource(R.string.volver))
             }
         }
     }
@@ -173,7 +175,7 @@ fun PantallaPrincipalMisiones(onBack: () -> Unit) {
                 elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
             ) {
                 Text(
-                    text = " +$xpGanada XP",
+                    text = stringResource(R.string.xp_ganada,xpGanada),
                     modifier = Modifier.padding(horizontal = 30.dp, vertical = 20.dp),
                     color = Color(0xFFFFD700),
                     fontSize = 22.sp,
@@ -216,7 +218,7 @@ fun MissionCard(
                 IconButton(onClick = onComplete) {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = "Completar",
+                        contentDescription = stringResource(R.string.completar),
                         tint = Color(0xFF00A86B)
                     )
                 }
@@ -224,7 +226,7 @@ fun MissionCard(
                 IconButton(onClick = onCancel) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Cancelar",
+                        contentDescription = stringResource(R.string.cancelar_accion),
                         tint = Color.Red
                     )
                 }

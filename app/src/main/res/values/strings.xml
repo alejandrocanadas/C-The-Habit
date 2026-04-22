@@ -42,6 +42,16 @@
     <string name="vida_usuario"> TU: %1$s </string>
     <string name="vida_enemigo"> HP: %1$d/%2$d </string>
 
+    <!--Preguntas-->
+    <string name="selecciona_minimo"> Selecciona mínimo %1$d opciones </string>
+    <string name="siguiente"> Siguiente </string>
+    <string name="finalizar"> Finalizar </string>
+
+    <!--Misiones-->
+    <string name="xp_ganada"> +%1$d XP </string>
+    <string name="completar"> Completar </string>
+    <string name="cancelar_accion"> Cancelar </string>
+
     <!--Perfil-->
     <string name="reiniciar_nivel"> ¿Reiniciar nivel? </string>
     <string name="si_se_reinicia_nivel"> Tu progreso volverá al nivel 1. Esta acción no se puede deshacer. </string>
@@ -53,6 +63,7 @@
     <string name="conceder_permiso"> Conceder Permiso </string>
     <string name="sincronizacion_activa"> Sincronización activa </string>
     <string name="siguiente_sincronizacion"> Siguiente en: %1$s </string>
+    <string name="reiniciar_progreso"> Reiniciar progreso </string>
     <string name="cerrar_sesion"> Cerrar sesión </string>
 
     <!--Gráficas-->
@@ -61,13 +72,14 @@
     <string name="apps"> APPS </string>
     <string name="distribucion_por_app"> Distribución por app </string>
     <string name="participacion_tiempo"> Participación relativa del tiempo</string>
-    <string name="tiempo_por_aplicación"> Tiempo por aplicación </string>
+    <string name="tiempo_por_aplicacion"> Tiempo por aplicación </string>
     <string name="minutos_acumulados"> Minutos de uso acumulados </string>
     <string name="tendencia_diaria"> Tendencia diaria </string>
     <string name="minutos_totales_dia"> Minutos totales por día</string>
     <string name="ultimas_24h"> ÚLTIMAS 24H </string>
     <string name="ultimos_7d"> ÚLTIMOS 7 DÍAS</string>
     <string name="analisis_uso"> Análisis de uso</string>
+    <string name="toca_fuera"> Toca fuera para cerrar</string>
 
     <!--Calendario-->
     <string name="historial_misiones"> Historial de misiones </string>
@@ -94,19 +106,6 @@
     <string name="sube_nivel_trofeos"> Sube al nivel %1$d </string>
     <string name="rango_dificultad"> ⚡ %1$d – %2$d </string>
     <string name="dificultad"> ⚡ %1$d </string>
-    <string name="tiempo_en_pantalla"> Tiempo en pantalla </string>
-    <string name="misiones_diarias"> Misiones diarias </string>
-    <string name="racha_de_días"> Racha de días </string>
-    <string name="otros"> Otros </string>
-    <string name="condicion_enemigo_tiempo_red_1"> Aparece con ≥ 1h de pantalla </string>
-    <string name="condicion_enemigo_tiempo_red_2"> Aparece con ≥ 3h de pantalla </string>
-    <string name="condicion_enemigo_tiempo_red_3"> Aparece con ≥ 5h de pantalla </string>
-    <string name="condicion_enemigo_tiempo_red_4"> Aparece con ≥ 6h de pantalla </string>
-    <string name="condicion_enemigo_mision_1"> Aparece si tienes misiones </string>
-    <string name="condicion_enemigo_mision_3"> Aparece si fallas 3+ misiones </string>
-    <string name="condicion_enemigo_racha_1"> Aparece con racha ≥ 1 día </string>
-    <string name="condicion_enemigo_racha_2"> Aparece con racha ≥ 3 días </string>
-    <string name="condicion_enemigo_racha_3"> Aparece con racha ≥ 7 días </string>
 
     <!--Bottom Nav-->
     <string name="bottom_estadísticas"> Estadísticas </string>

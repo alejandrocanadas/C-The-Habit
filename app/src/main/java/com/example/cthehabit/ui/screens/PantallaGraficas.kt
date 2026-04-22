@@ -30,6 +30,8 @@ import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import androidx.compose.ui.res.stringResource
+import com.example.cthehabit.R
 
 
 private val BgDark       = Color(0xFF0D0F14)
@@ -110,19 +112,19 @@ fun PantallaGraficas(tipo: String) {
             ) {
                 StatCard(
                     modifier = Modifier.weight(1f),
-                    label    = "TIEMPO TOTAL",
+                    label    = stringResource(R.string.tiempo_total),
                     value    = formatMinutes(totalMinutes),
                     accent   = NeonBlue
                 )
                 StatCard(
                     modifier = Modifier.weight(1f),
-                    label    = "APP TOP",
+                    label    = stringResource(R.string.app_top),
                     value    = topApp?.key?.take(10) ?: "—",
                     accent   = NeonPurple
                 )
                 StatCard(
                     modifier = Modifier.weight(1f),
-                    label    = "APPS",
+                    label    = stringResource(R.string.apps),
                     value    = "${usageByAppFriendly.size}",
                     accent   = NeonGreen
                 )
@@ -132,8 +134,8 @@ fun PantallaGraficas(tipo: String) {
 
 
             ChartCard(
-                title    = "Distribución por app",
-                subtitle = "Participación relativa del tiempo",
+                title    = stringResource(R.string.distribucion_por_app),
+                subtitle = stringResource(R.string.participacion_tiempo),
                 accent   = NeonPurple,
                 onClick  = { expandedChart = { ExpandedPie(usageByAppFriendly) } }
             ) {
@@ -144,8 +146,8 @@ fun PantallaGraficas(tipo: String) {
 
 
             ChartCard(
-                title    = "Tiempo por aplicación",
-                subtitle = "Minutos de uso acumulados",
+                title    = stringResource(R.string.tiempo_por_aplicacion),
+                subtitle = stringResource(R.string.minutos_acumulados),
                 accent   = NeonBlue,
                 onClick  = { expandedChart = { ExpandedBar(usageByAppFriendly) } }
             ) {
@@ -155,8 +157,8 @@ fun PantallaGraficas(tipo: String) {
             if (tipo == "7d") {
                 Spacer(Modifier.height(16.dp))
                 ChartCard(
-                    title    = "Tendencia diaria",
-                    subtitle = "Minutos totales por día",
+                    title    = stringResource(R.string.tendencia_diaria),
+                    subtitle = stringResource(R.string.minutos_totales_dia),
                     accent   = NeonGreen,
                     onClick  = { expandedChart = { ExpandedLine(dailyUsageFriendly) } }
                 ) {
@@ -200,7 +202,7 @@ fun PantallaGraficas(tipo: String) {
 @Composable
 private fun HeaderSection(tipo: String) {
     val isToday  = tipo == "24h"
-    val tag      = if (isToday) "ÚLTIMAS 24H" else "ÚLTIMOS 7 DÍAS"
+    val tag = if (isToday) stringResource(R.string.ultimas_24h) else stringResource(R.string.ultimos_7d)
     val tagColor = if (isToday) NeonAmber else NeonBlue
 
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -217,7 +219,7 @@ private fun HeaderSection(tipo: String) {
         Spacer(Modifier.width(12.dp))
         Column {
             Text(
-                text       = "Análisis de uso",
+                text       = stringResource(R.string.analisis_uso),
                 fontSize   = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color      = TextPrimary,
@@ -589,9 +591,9 @@ fun NeonLineChart(data: Map<String, Float>, heightDp: Int = 260) {
 @Composable
 private fun ExpandedPie(data: Map<String, Float>) {
     Column {
-        Text("Distribución por app", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+        Text(stringResource(R.string.distribucion_por_app), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
         Spacer(Modifier.height(4.dp))
-        Text("Toca fuera para cerrar", fontSize = 11.sp, color = TextMuted)
+        Text(stringResource(R.string.toca_fuera), fontSize = 11.sp, color = TextMuted)
         Spacer(Modifier.height(16.dp))
         NeonPieChart(data, heightDp = 420)
     }
@@ -600,9 +602,9 @@ private fun ExpandedPie(data: Map<String, Float>) {
 @Composable
 private fun ExpandedBar(data: Map<String, Float>) {
     Column {
-        Text("Tiempo por aplicación", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+        Text(stringResource(R.string.tiempo_por_aplicacion), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
         Spacer(Modifier.height(4.dp))
-        Text("Toca fuera para cerrar", fontSize = 11.sp, color = TextMuted)
+        Text(stringResource(R.string.toca_fuera), fontSize = 11.sp, color = TextMuted)
         Spacer(Modifier.height(16.dp))
         NeonBarChart(data, heightDp = 420)
     }
@@ -611,9 +613,9 @@ private fun ExpandedBar(data: Map<String, Float>) {
 @Composable
 private fun ExpandedLine(data: Map<String, Float>) {
     Column {
-        Text("Tendencia diaria", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+        Text(stringResource(R.string.tendencia_diaria), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
         Spacer(Modifier.height(4.dp))
-        Text("Toca fuera para cerrar", fontSize = 11.sp, color = TextMuted)
+        Text(stringResource(R.string.toca_fuera), fontSize = 11.sp, color = TextMuted)
         Spacer(Modifier.height(16.dp))
         NeonLineChart(data, heightDp = 420)
     }

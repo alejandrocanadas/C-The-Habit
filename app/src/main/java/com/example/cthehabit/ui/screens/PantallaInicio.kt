@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -27,21 +28,21 @@ fun PantallaInicio(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        Text("C", fontSize = 130.sp)
+        Text(stringResource(R.string.c), fontSize = 130.sp)
 
-        Text("THE HABIT", fontSize = 50.sp)
+        Text(stringResource(R.string.the_habit), fontSize = 50.sp)
         Spacer(Modifier.height(16.dp))
 
         Spacer(Modifier.height(40.dp))
 
         Button(onClick = onEmpezarClick, modifier = Modifier.fillMaxWidth()) {
-            Text("Empezar")
+            Text(stringResource(R.string.empezar))
         }
 
         Spacer(Modifier.height(16.dp))
 
         Button(onClick = onLoginClick, modifier = Modifier.fillMaxWidth()) {
-            Text("Inicia Sesión")
+            Text(stringResource(R.string.inicia_sesion))
         }
     }
 }

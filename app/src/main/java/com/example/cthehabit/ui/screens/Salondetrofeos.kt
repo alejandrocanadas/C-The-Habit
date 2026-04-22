@@ -22,6 +22,8 @@ import com.example.cthehabit.ui.game.CharacterComponent
 import com.example.cthehabit.ui.game.CharacterState
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import androidx.compose.ui.res.stringResource
+import com.example.cthehabit.R
 
 private val BgDark    = Color(0xFF0D0D1A)
 private val BgCard    = Color(0xFF16162A)
@@ -139,12 +141,12 @@ fun SalonDeTrofeos() {
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        "⚔  SALÓN DE TROFEOS  ⚔",
+                        stringResource(R.string.salon_trofeos),
                         fontSize = 18.sp, fontWeight = FontWeight.Black,
                         color = Gold, letterSpacing = 2.sp
                     )
                     Text(
-                        "Nivel alcanzado: $nivelActual",
+                        stringResource(R.string.nivel_alcanzado, nivelActual),
                         fontSize = 12.sp, color = TextMuted, letterSpacing = 1.sp
                     )
                 }
@@ -181,18 +183,18 @@ fun SalonDeTrofeos() {
                 ) {
                     Column {
                         Text(
-                            "RACHA ACTUAL", fontSize = 10.sp,
+                            stringResource(R.string.racha_actual), fontSize = 10.sp,
                             color = TextMuted, letterSpacing = 2.sp, fontWeight = FontWeight.Bold
                         )
                         Text(
-                            "🔥  $rachaActual días",
+                            stringResource(R.string.racha_dias, rachaActual),
                             fontSize = 28.sp, fontWeight = FontWeight.Black,
                             color = if (rachaActual > 0) Gold else TextMuted
                         )
                     }
                     Column(horizontalAlignment = Alignment.End) {
-                        Text("Actualiza cada día", fontSize = 10.sp, color = TextMuted, textAlign = TextAlign.End)
-                        Text("según tus misiones", fontSize = 10.sp, color = TextMuted, textAlign = TextAlign.End)
+                        Text(stringResource(R.string.actualiza_cada_dia), fontSize = 10.sp, color = TextMuted, textAlign = TextAlign.End)
+                        Text(stringResource(R.string.segun_tus_misiones), fontSize = 10.sp, color = TextMuted, textAlign = TextAlign.End)
                     }
                 }
             }
@@ -206,8 +208,8 @@ fun SalonDeTrofeos() {
                     .background(BgCard)
             ) {
                 listOf(
-                    "⚔ Héroes ($jugadoresDesbloqueados/${players.size})",
-                    "💀 Enemigos (${GameCharacter.ENEMIES.size})"
+                    stringResource(R.string.heroes, jugadoresDesbloqueados, players.size),
+                    stringResource(R.string.enemigos, GameCharacter.ENEMIES.size)
                 ).forEachIndexed { index, label ->
                     Box(
                         modifier = Modifier
@@ -254,7 +256,7 @@ fun SalonDeTrofeos() {
                                     HeroeCard(
                                         character = character,
                                         unlocked  = unlocked,
-                                        lockText  = "Sube al nivel ${globalIndex * 3 + 1}"
+                                        lockText  = stringResource(R.string.sube_nivel_trofeos, globalIndex * 3 + 1)
                                     )
                                 }
                             }
@@ -303,7 +305,7 @@ fun SalonDeTrofeos() {
                                     val minDif = grupoEnemigos.minOf { it.config.dificultad }
                                     val maxDif = grupoEnemigos.maxOf { it.config.dificultad }
                                     Text(
-                                        "⚡ $minDif – $maxDif",
+                                        stringResource(R.string.rango_dificultad, minDif, maxDif),
                                         fontSize = 12.sp,
                                         color = color.copy(alpha = 0.8f),
                                         fontWeight = FontWeight.Bold
@@ -449,7 +451,7 @@ private fun EnemyCard(character: GameCharacter) {
                         .padding(horizontal = 5.dp, vertical = 2.dp)
                 ) {
                     Text(
-                        "⚡ ${character.config.dificultad}",
+                        stringResource(R.string.dificultad, character.config.dificultad),
                         fontSize = 9.sp, color = Color.Black, fontWeight = FontWeight.Bold
                     )
                 }

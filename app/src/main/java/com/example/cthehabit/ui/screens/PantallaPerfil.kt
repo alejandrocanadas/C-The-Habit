@@ -29,6 +29,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.delay
+import androidx.compose.ui.res.stringResource
+import com.example.cthehabit.R
 
 @Composable
 fun PantallaPerfil(
@@ -60,8 +62,8 @@ fun PantallaPerfil(
     if (mostrarConfirmacion) {
         AlertDialog(
             onDismissRequest = { mostrarConfirmacion = false },
-            title = { Text("¿Reiniciar nivel?", color = Color.White, fontWeight = FontWeight.Bold) },
-            text = { Text("Tu progreso volverá al nivel 1. Esta acción no se puede deshacer.", color = Color.LightGray) },
+            title = { Text(stringResource(R.string.reiniciar_nivel), color = Color.White, fontWeight = FontWeight.Bold) },
+            text = { Text(stringResource(R.string.si_se_reinicia_nivel), color = Color.LightGray) },
             containerColor = Color(0xFF1A1C2C),
             confirmButton = {
                 Button(
@@ -76,12 +78,12 @@ fun PantallaPerfil(
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F)),
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text("Sí, reiniciar", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.confirmar_reinicio), color = Color.White, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { mostrarConfirmacion = false }) {
-                    Text("Cancelar", color = Color.Gray)
+                    Text(stringResource(R.string.cancelar), color = Color.Gray)
                 }
             }
         )
@@ -95,7 +97,7 @@ fun PantallaPerfil(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "PERFIL",
+            text = stringResource(R.string.perfil),
             fontSize = 18.sp,
             color = Color.Cyan,
             fontWeight = FontWeight.Bold,
@@ -128,7 +130,7 @@ fun PantallaPerfil(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = currentUser?.email ?: "Sin correo registrado",
+            text = currentUser?.email ?: stringResource(R.string.sin_correo_registrado),
             color = Color.White,
             fontSize = 15.sp,
             fontWeight = FontWeight.Medium
@@ -144,7 +146,7 @@ fun PantallaPerfil(
         ) {
             Column(Modifier.padding(16.dp)) {
                 if (!tienePermiso) {
-                    Text("Faltan permisos de uso", color = Color(0xFFFFB74D), fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.faltan_permisos_de_uso), color = Color(0xFFFFB74D), fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(
                         onClick = {
@@ -154,11 +156,11 @@ fun PantallaPerfil(
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Cyan)
                     ) {
-                        Text("Conceder Permiso", color = Color.Black, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.conceder_permiso), color = Color.Black, fontWeight = FontWeight.Bold)
                     }
                 } else {
-                    Text("Sincronización activa", color = Color.Cyan, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                    Text("Siguiente en: $remainingTime", color = Color.Gray, fontSize = 13.sp)
+                    Text(stringResource(R.string.sincronizacion_activa), color = Color.Cyan, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Text(stringResource(R.string.siguiente_sincronizacion, remainingTime), color = Color.Gray, fontSize = 13.sp)
                 }
             }
         }
@@ -172,7 +174,7 @@ fun PantallaPerfil(
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2A2D42)),
             contentPadding = PaddingValues(0.dp)
         ) {
-            Text("Reiniciar progreso", color = Color.White, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.reiniciar_progreso), color = Color.White, fontWeight = FontWeight.Bold)
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -184,7 +186,7 @@ fun PantallaPerfil(
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F)),
             contentPadding = PaddingValues(0.dp)
         ) {
-            Text("Cerrar Sesión", color = Color.White, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.cerrar_sesion), color = Color.White, fontWeight = FontWeight.Bold)
         }
 
         Spacer(modifier = Modifier.height(10.dp))

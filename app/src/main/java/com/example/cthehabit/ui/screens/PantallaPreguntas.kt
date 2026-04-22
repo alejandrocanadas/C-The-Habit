@@ -42,6 +42,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.res.stringResource
+import com.example.cthehabit.R
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -87,7 +89,7 @@ fun PantallaPreguntas(onFinish: (Map<Int, List<String>>) -> Unit) {
             Spacer(modifier = Modifier.height(28.dp))
 
             Text(
-                text = "C The Habit",
+                text = stringResource(R.string.app_name),
                 fontSize = 28.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = negro
@@ -139,7 +141,7 @@ fun PantallaPreguntas(onFinish: (Map<Int, List<String>>) -> Unit) {
 
             if (currentQuestion.multipleSelection) {
                 Text(
-                    text = "Selecciona mínimo ${currentQuestion.minSelections} opciones",
+                    text = stringResource(R.string.selecciona_minimo, currentQuestion.minSelections),
                     color = Color.White,
                     fontSize = 14.sp
                 )
@@ -168,10 +170,11 @@ fun PantallaPreguntas(onFinish: (Map<Int, List<String>>) -> Unit) {
                     .height(56.dp)
             ) {
                 Text(
-                    text = if (currentQuestionIndex < questions.size - 1)
-                        "Siguiente"
-                    else
-                        "Finalizar",
+                    text =
+                        if (currentQuestionIndex < questions.size - 1)
+                            stringResource(R.string.siguiente)
+                        else
+                            stringResource(R.string.finalizar),
                     color = Color.White,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
