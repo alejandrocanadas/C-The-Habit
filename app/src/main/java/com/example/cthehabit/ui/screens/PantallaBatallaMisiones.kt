@@ -14,6 +14,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.example.cthehabit.R
 
 @Composable
 fun PantallaBatallaMisiones(
@@ -75,7 +77,7 @@ fun PantallaBatallaMisiones(
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = "Ver misiones",
+                    text = stringResource(R.string.ver_misiones),
                     fontSize = 17.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = Color.White

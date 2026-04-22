@@ -27,6 +27,8 @@ import com.example.cthehabit.ui.game.CharacterComponent
 import com.example.cthehabit.ui.game.CharacterState
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import androidx.compose.ui.res.stringResource
+import com.example.cthehabit.R
 
 private val BgDark    = Color(0xFF0D0D1A)
 private val BgCard    = Color(0xFF16162A)
@@ -63,7 +65,7 @@ fun CharacterSelectScreen(horas: Int, onStartGame: (Int, Int) -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text       = "Selecciona tu Héroe",
+            text       = stringResource(R.string.selecciona_heroe),
             style      = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Black,
             color      = Gold,
@@ -159,7 +161,7 @@ fun CharacterSelectScreen(horas: Int, onStartGame: (Int, Int) -> Unit) {
                 .height(56.dp)
                 .padding(horizontal = 16.dp)
         ) {
-            Text("¡A LUCHAR!", fontWeight = FontWeight.Black, fontSize = 16.sp)
+            Text(stringResource(R.string.a_luchar), fontWeight = FontWeight.Black, fontSize = 16.sp)
         }
     }
 }

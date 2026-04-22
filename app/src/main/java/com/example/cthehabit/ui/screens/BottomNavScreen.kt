@@ -22,6 +22,7 @@ import com.example.cthehabit.viewmodels.AppUsageViewModel
 import com.example.cthehabit.utils.*
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.compose.ui.res.stringResource
 
 // --- Definición de Destinos ---
 sealed class BottomNavDestination(val route: String, val label: String, val icon: String) {

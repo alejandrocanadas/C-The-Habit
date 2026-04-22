@@ -26,6 +26,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.example.cthehabit.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,7 +47,7 @@ fun PantallaInicialEncuesta(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "C The Habit",
+                text = stringResource(R.string.app_name),
                 fontSize = 30.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = Color.White
@@ -54,7 +56,7 @@ fun PantallaInicialEncuesta(
             Spacer(modifier = Modifier.height(120.dp))
 
             Text(
-                text = "Queremos\nconocerte\nmejor, \nResponde las\nsiguientes\npreguntas",
+                text = stringResource(R.string.queremos_conocerte),
                 fontSize = 34.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = Color.White,
@@ -77,7 +79,7 @@ fun PantallaInicialEncuesta(
                     .height(56.dp)
             ) {
                 Text(
-                    text = "Continuar",
+                    text = stringResource(R.string.continuar),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )

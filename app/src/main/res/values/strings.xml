@@ -1,3 +1,135 @@
 <resources>
-    <string name="app_name">C the Habit</string>
+    <string name="app_name">C The Habit</string>
+
+    <!--Inicio-->
+    <string name="c"> C </string>
+    <string name="the_habit"> The Habit </string>
+    <string name="empezar"> Empezar </string>
+    <!--String iniciar sesion-->
+
+    <!--Registro-->
+    <string name="crear_cuenta"> Crear cuenta </string>
+    <string name="nombre"> Nombre </string>
+    <string name="creando_cuenta"> Creando cuenta... </string>
+    <string name="ya_tienes_cuenta"> ¿Ya tienes cuenta? Inicia sesión </string>
+
+    <!--Login-->
+    <string name="inicia_sesion"> Inicia sesión </string>
+    <string name="iniciar_sesion"> Iniciar sesión </string>
+    <string name="ingresando"> Ingresando... </string>
+    <string name="no_tienes_cuenta"> ¿No tienes cuenta? Crear cuenta </string>
+
+    <!-- Registro y Login -->
+    <string name="correo_electronico"> Correo electrónico </string>
+    <string name="contrasena"> Contraseña </string>
+    <string name="volver"> Volver </string>
+
+    <!--Encuesta-->
+    <string name="queremos_conocerte"> Queremos\nconocerte\nmejor,\nResponde las\nsiguientes\npreguntas </string>
+    <string name="continuar"> Continuar </string>
+    <string name="mensaje_inicial"> Esto es todo lo que puedes lograr siguiendo este plan </string>
+    <string name="misiones_hoy"> Misiones de Hoy </string>
+    <string name="no_hay_misiones"> No hay más misiones para el día de hoy </string>
+
+    <!--Principal-->
+    <string name="subir_nivel_batalla"> ¡Mata enemigo para subir! </string>
+    <string name="nivel"> Nivel %1$d </string>
+    <string name="progreso_xp"> %1$d / %2$d XP </string>
+    <string name="tiempo_pantalla"> Tiempo en pantalla: %1$dh hoy </string>
+    <string name="misiones"> Misiones: %1$d/%2$d </string>
+    <string name="racha"> 🔥Racha: %1$d días </string>
+    <string name="ver_misiones"> Ver misiones </string>
+    <string name="vida_usuario"> TU: %1$s </string>
+    <string name="vida_enemigo"> HP: %1$d/%2$d </string>
+
+    <!--Perfil-->
+    <string name="reiniciar_nivel"> ¿Reiniciar nivel? </string>
+    <string name="si_se_reinicia_nivel"> Tu progreso volverá al nivel 1. Esta acción no se puede deshacer. </string>
+    <string name="confirmar_reinicio"> Sí, reiniciar </string>
+    <string name="cancelar"> Cancelar </string>
+    <string name="perfil"> PERFIL </string>
+    <string name="sin_correo_registrado"> Sin correo registrado </string>
+    <string name="faltan_permisos_de_uso"> Faltan permisos de uso </string>
+    <string name="conceder_permiso"> Conceder Permiso </string>
+    <string name="sincronizacion_activa"> Sincronización activa </string>
+    <string name="siguiente_sincronizacion"> Siguiente en: %1$s </string>
+    <string name="cerrar_sesion"> Cerrar sesión </string>
+
+    <!--Gráficas-->
+    <string name="tiempo_total"> TIEMPO TOTAL </string>
+    <string name="app_top"> APP TOP </string>
+    <string name="apps"> APPS </string>
+    <string name="distribucion_por_app"> Distribución por app </string>
+    <string name="participacion_tiempo"> Participación relativa del tiempo</string>
+    <string name="tiempo_por_aplicación"> Tiempo por aplicación </string>
+    <string name="minutos_acumulados"> Minutos de uso acumulados </string>
+    <string name="tendencia_diaria"> Tendencia diaria </string>
+    <string name="minutos_totales_dia"> Minutos totales por día</string>
+    <string name="ultimas_24h"> ÚLTIMAS 24H </string>
+    <string name="ultimos_7d"> ÚLTIMOS 7 DÍAS</string>
+    <string name="analisis_uso"> Análisis de uso</string>
+
+    <!--Calendario-->
+    <string name="historial_misiones"> Historial de misiones </string>
+    <string name="no_hay_historial"> No hay historial disponible aún </string>
+    <string name="buen_dia"> Buen día </string>
+    <string name="regular"> Regular </string>
+    <string name="mal_dia"> Mal día </string>
+    <string name="sin_datos"> Sin datos </string>
+    <string name="uso_redes"> Uso en redes: %1$s h / Meta: %2$s h </string>
+
+    <!--Personajes-->
+    <string name="selecciona_heroe"> Selecciona tu Héroe </string>
+    <string name="a_luchar"> ¡A LUCHAR! </string>
+
+    <!--Trofeos-->
+    <string name="salon_trofeos"> ⚔  SALÓN DE TROFEOS  ⚔ </string>
+    <string name="nivel_alcanzado"> Nivel alcanzado: %1$d </string>
+    <string name="racha_actual"> RACHA ACTUAL </string>
+    <string name="racha_dias"> 🔥 %1$d días </string>
+    <string name="actualiza_cada_dia"> Actualiza cada día </string>
+    <string name="segun_tus_misiones"> según tus misiones </string>
+    <string name="heroes"> ⚔ Héroes (%1$d/%2$d) </string>
+    <string name="enemigos"> 💀 Enemigos (%1$d) </string>
+    <string name="sube_nivel_trofeos"> Sube al nivel %1$d </string>
+    <string name="rango_dificultad"> ⚡ %1$d – %2$d </string>
+    <string name="dificultad"> ⚡ %1$d </string>
+    <string name="tiempo_en_pantalla"> Tiempo en pantalla </string>
+    <string name="misiones_diarias"> Misiones diarias </string>
+    <string name="racha_de_días"> Racha de días </string>
+    <string name="otros"> Otros </string>
+    <string name="condicion_enemigo_tiempo_red_1"> Aparece con ≥ 1h de pantalla </string>
+    <string name="condicion_enemigo_tiempo_red_2"> Aparece con ≥ 3h de pantalla </string>
+    <string name="condicion_enemigo_tiempo_red_3"> Aparece con ≥ 5h de pantalla </string>
+    <string name="condicion_enemigo_tiempo_red_4"> Aparece con ≥ 6h de pantalla </string>
+    <string name="condicion_enemigo_mision_1"> Aparece si tienes misiones </string>
+    <string name="condicion_enemigo_mision_3"> Aparece si fallas 3+ misiones </string>
+    <string name="condicion_enemigo_racha_1"> Aparece con racha ≥ 1 día </string>
+    <string name="condicion_enemigo_racha_2"> Aparece con racha ≥ 3 días </string>
+    <string name="condicion_enemigo_racha_3"> Aparece con racha ≥ 7 días </string>
+
+    <!--Bottom Nav-->
+    <string name="bottom_estadísticas"> Estadísticas </string>
+    <string name="bottom_calendario"> Calendario </string>
+    <string name="bottom_juego"> Juego </string>
+    <string name="bottom_trofeos"> Trofeos </string>
+    <string name="bottom_perfil"> Perfil </string>
+    <string name="estadisticas_uso"> Estadísticas de uso </string>
+    <string name="calcular_24h"> Calcular métricas 24h </string>
+    <string name="calcular_7dias"> Calcular últimos 7 días </string>
+    <string name="ver_graficas_24h"> Ver gráficas 24h </string>
+    <string name="ver_graficas_7dias"> Ver gráficas 7 días </string>
+    <string name="minutos"> %1$d min </string>
+
+    <string name="app_instagram">Instagram</string>
+    <string name="app_facebook">Facebook</string>
+    <string name="app_tiktok">TikTok</string>
+    <string name="app_x">X</string>
+    <string name="app_reddit">Reddit</string>
+    <string name="app_youtube">YouTube</string>
+    <string name="app_snapchat">Snapchat</string>
+    <string name="app_vsco">VSCO</string>
+    <string name="app_whatsapp">WhatsApp</string>
+    
+
 </resources>

@@ -28,6 +28,8 @@ import java.util.*
 import com.example.cthehabit.data.repositories.FirestoreRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import androidx.compose.ui.res.stringResource
+import com.example.cthehabit.R
 
 enum class DayStatus {
     GOOD,
@@ -212,7 +214,7 @@ fun PantallaCalendario() {
 
         // ── Título historial ─────────────────────────────────────────────
         Text(
-            text = "Historial de misiones",
+            text = stringResource(R.string.historial_misiones),
             fontWeight = FontWeight.Bold,
             fontSize = 16.sp,
             color = Color.White,
@@ -225,7 +227,7 @@ fun PantallaCalendario() {
         // ── Tarjetas de historial semanal ────────────────────────────────
         if (weekHistory.value.isEmpty()) {
             Text(
-                text = "No hay historial disponible aún",
+                text = stringResource(R.string.no_hay_historial),
                 fontSize = 14.sp,
                 color = Color.Gray,
                 modifier = Modifier.fillMaxWidth(),
@@ -252,10 +254,10 @@ fun MissionHistoryCard(
     val dateLabel = daySummary.date.format(formatter).replaceFirstChar { it.uppercase() }
 
     val (statusLabel, statusBg, statusTextColor) = when (status) {
-        DayStatus.GOOD    -> Triple("Buen día",   Color(0xFFE8F5E9), Color(0xFF2E7D32))
-        DayStatus.REGULAR -> Triple("Regular",    Color(0xFFFFF8E1), Color(0xFFF57F17))
-        DayStatus.BAD     -> Triple("Mal día",    Color(0xFFFFEBEE), Color(0xFFB71C1C))
-        DayStatus.NONE    -> Triple("Sin datos",  Color(0xFFF5F5F5), Color(0xFF757575))
+        DayStatus.GOOD    -> Triple(stringResource(R.string.buen_dia),   Color(0xFFE8F5E9), Color(0xFF2E7D32))
+        DayStatus.REGULAR -> Triple(stringResource(R.string.regular),    Color(0xFFFFF8E1), Color(0xFFF57F17))
+        DayStatus.BAD     -> Triple(stringResource(R.string.mal_dia),    Color(0xFFFFEBEE), Color(0xFFB71C1C))
+        DayStatus.NONE    -> Triple(stringResource(R.string.sin_datos),  Color(0xFFF5F5F5), Color(0xFF757575))
     }
 
     Card(
@@ -294,11 +296,19 @@ fun MissionHistoryCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Uso en redes: ${
-                    String.format(Locale("es", "ES"), "%.1f", daySummary.usageHours)
-                } h / Meta: ${
-                    String.format(Locale("es", "ES"), "%.1f", daySummary.usageLimitHours)
-                } h",
+                text = stringResource(
+                    R.string.uso_redes,
+                    String.format(
+                        Locale("es","ES"),
+                        "%.1f",
+                        daySummary.usageHours
+                    ),
+                    String.format(
+                        Locale("es","ES"),
+                        "%.1f",
+                        daySummary.usageLimitHours
+                    )
+                ),
                 fontSize = 12.sp,
                 color = if (daySummary.usageHours > daySummary.usageLimitHours)
                     Color(0xFFB71C1C)
@@ -406,9 +416,9 @@ fun CalendarLegend() {
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        LegendItem(color = Color(0xFF4CAF50), label = "Buen día")
-        LegendItem(color = Color(0xFFFFC107), label = "Regular")
-        LegendItem(color = Color(0xFFF44336), label = "Mal día")
+        LegendItem(color = Color(0xFF4CAF50), label = stringResource(R.string.buen_dia))
+        LegendItem(color = Color(0xFFFFC107), label = stringResource(R.string.regular))
+        LegendItem(color = Color(0xFFF44336), label = stringResource(R.string.mal_dia))
     }
 }
 

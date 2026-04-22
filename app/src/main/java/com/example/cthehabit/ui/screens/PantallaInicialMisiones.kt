@@ -27,6 +27,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cthehabit.utils.Mission
+import androidx.compose.ui.res.stringResource
+import com.example.cthehabit.R
 
 @Composable
 fun PantallaInicialMisiones(
@@ -49,7 +51,7 @@ fun PantallaInicialMisiones(
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "C The Habit",
+                text = stringResource(R.string.app_name),
                 fontSize = 28.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = Color.Black
@@ -58,7 +60,7 @@ fun PantallaInicialMisiones(
             Spacer(modifier = Modifier.height(40.dp))
 
             Text(
-                text = "Esto es todo lo que puedes lograr siguiendo este plan",
+                text = stringResource(R.string.mensaje_inicial),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = Color.White,
@@ -85,7 +87,7 @@ fun PantallaInicialMisiones(
                     .height(56.dp)
             ) {
                 Text(
-                    text = "Continuar",
+                    text = stringResource(R.string.continuar),
                     color = Color.White,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
