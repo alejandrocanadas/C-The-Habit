@@ -31,7 +31,10 @@ val questions = listOf(
             "Relajarte",
             "Tocar un instrumento",
             "Cocinar",
-            "Aprender un idioma"
+            "Aprender un idioma",
+            "Escribir",
+            "Programar",
+            "Dibujar"
         ),
         multipleSelection = true,
         minSelections = 3

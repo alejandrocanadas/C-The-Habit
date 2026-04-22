@@ -40,6 +40,8 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -61,6 +63,8 @@ fun PantallaPreguntas(onFinish: (Map<Int, List<String>>) -> Unit) {
         selectedOptions.isNotEmpty()
     }
 
+    val scrollState = rememberScrollState()
+
     val fondoAzul = Color(0xFF3F8EFC)
     val colorTarjeta = Color(0xFFACD7F6)
     val colorTarjetaSeleccionada = Color(0xFF7BBCEB)
@@ -75,7 +79,8 @@ fun PantallaPreguntas(onFinish: (Map<Int, List<String>>) -> Unit) {
                 .fillMaxSize()
                 .background(fondoAzul)
                 .padding(innerPadding)
-                .padding(horizontal = 24.dp, vertical = 16.dp),
+                .padding(horizontal = 24.dp, vertical = 16.dp)
+                .verticalScroll(scrollState),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
@@ -88,7 +93,7 @@ fun PantallaPreguntas(onFinish: (Map<Int, List<String>>) -> Unit) {
                 color = negro
             )
 
-            Spacer(modifier = Modifier.height(60.dp))
+            Spacer(modifier = Modifier.height(40.dp))
 
             Text(
                 text = currentQuestion.text,
@@ -100,12 +105,13 @@ fun PantallaPreguntas(onFinish: (Map<Int, List<String>>) -> Unit) {
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(36.dp))
+            Spacer(modifier = Modifier.height(30.dp))
 
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalArrangement = Arrangement.spacedBy(18.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                maxItemsInEachRow = 2
             ) {
                 currentQuestion.options.forEach { option ->
                     OpcionCard(
@@ -129,7 +135,7 @@ fun PantallaPreguntas(onFinish: (Map<Int, List<String>>) -> Unit) {
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(24.dp))
 
             if (currentQuestion.multipleSelection) {
                 Text(
@@ -139,7 +145,7 @@ fun PantallaPreguntas(onFinish: (Map<Int, List<String>>) -> Unit) {
                 )
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(24.dp))
 
             Button(
                 onClick = {
@@ -148,7 +154,6 @@ fun PantallaPreguntas(onFinish: (Map<Int, List<String>>) -> Unit) {
                     if (currentQuestionIndex < questions.size - 1) {
                         currentQuestionIndex++
                     } else {
-                        respuestas[currentQuestionIndex] = selectedOptions.toList()
                         onFinish(respuestas.toMap())
                     }
                 },
@@ -163,7 +168,10 @@ fun PantallaPreguntas(onFinish: (Map<Int, List<String>>) -> Unit) {
                     .height(56.dp)
             ) {
                 Text(
-                    text = if (currentQuestionIndex < questions.size - 1) "Siguiente" else "Finalizar",
+                    text = if (currentQuestionIndex < questions.size - 1)
+                        "Siguiente"
+                    else
+                        "Finalizar",
                     color = Color.White,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
