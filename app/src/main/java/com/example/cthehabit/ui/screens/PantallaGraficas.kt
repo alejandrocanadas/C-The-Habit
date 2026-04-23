@@ -108,7 +108,7 @@ fun PantallaGraficas(tipo: String) {
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 StatCard(
                     modifier = Modifier.weight(1f),
@@ -128,6 +128,7 @@ fun PantallaGraficas(tipo: String) {
                     value    = "${usageByAppFriendly.size}",
                     accent   = NeonGreen
                 )
+
             }
 
             Spacer(Modifier.height(24.dp))
@@ -223,14 +224,16 @@ private fun HeaderSection(tipo: String) {
                 fontSize   = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color      = TextPrimary,
-                letterSpacing = 0.5.sp
+                letterSpacing = 0.5.sp,
+                style = MaterialTheme.typography.bodyLarge
             )
             Text(
                 text     = tag,
                 fontSize = 12.sp,
                 color    = tagColor,
                 fontWeight = FontWeight.Medium,
-                letterSpacing = 2.sp
+                letterSpacing = 2.sp,
+                style = MaterialTheme.typography.labelLarge
             )
         }
     }
@@ -274,7 +277,8 @@ private fun StatCard(
                 color = TextMuted,
                 fontWeight = FontWeight.Medium,
                 letterSpacing = 1.2.sp, // Un poco menos de spacing para que no ocupe tanto
-                maxLines = 1
+                maxLines = 1,
+                style = MaterialTheme.typography.bodyLarge
             )
             Spacer(Modifier.height(4.dp))
 
@@ -282,14 +286,16 @@ private fun StatCard(
                 text = value,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.bodyLarge,
                 color = TextPrimary,
                 maxLines = 1,
                 // Si el texto es más largo que el espacio, se deslizará solo
                 modifier = Modifier.basicMarquee(
                     iterations = Int.MAX_VALUE,
                     initialDelayMillis = 2000,
-                    velocity = 30.dp // Velocidad suave
+                    velocity = 30.dp, // Velocidad suave
                 )
+
             )
         }
     }
@@ -336,12 +342,14 @@ private fun ChartCard(
                         text       = title,
                         fontSize   = 15.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color      = TextPrimary
+                        color      = TextPrimary,
+                        style = MaterialTheme.typography.titleLarge
                     )
                     Text(
                         text     = subtitle,
                         fontSize = 11.sp,
-                        color    = TextMuted
+                        color    = TextMuted,
+                        style = MaterialTheme.typography.bodyLarge
                     )
                 }
                 // Chip "expandir"
@@ -355,7 +363,8 @@ private fun ChartCard(
                         text     = "↗",
                         color    = accent,
                         fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.labelLarge
                     )
                 }
             }
@@ -449,12 +458,14 @@ fun NeonPieChart(data: Map<String, Float>, heightDp: Int = 260) {
                             color      = TextPrimary,
                             maxLines   = 1,
                             overflow   = TextOverflow.Ellipsis,
-                            fontWeight = FontWeight.Medium
+                            fontWeight = FontWeight.Medium,
+                            style = MaterialTheme.typography.bodyLarge
                         )
                         Text(
                             text     = "${formatMinutes(value)} · $pct%",
                             fontSize = 10.sp,
-                            color    = TextMuted
+                            color    = TextMuted,
+                            style = MaterialTheme.typography.bodyLarge
                         )
                     }
                 }
@@ -591,9 +602,9 @@ fun NeonLineChart(data: Map<String, Float>, heightDp: Int = 260) {
 @Composable
 private fun ExpandedPie(data: Map<String, Float>) {
     Column {
-        Text(stringResource(R.string.distribucion_por_app), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+        Text(stringResource(R.string.distribucion_por_app), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary, style = MaterialTheme.typography.labelLarge)
         Spacer(Modifier.height(4.dp))
-        Text(stringResource(R.string.toca_fuera), fontSize = 11.sp, color = TextMuted)
+        Text(stringResource(R.string.toca_fuera), fontSize = 11.sp, color = TextMuted, style = MaterialTheme.typography.bodyLarge)
         Spacer(Modifier.height(16.dp))
         NeonPieChart(data, heightDp = 420)
     }
@@ -602,9 +613,9 @@ private fun ExpandedPie(data: Map<String, Float>) {
 @Composable
 private fun ExpandedBar(data: Map<String, Float>) {
     Column {
-        Text(stringResource(R.string.tiempo_por_aplicacion), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+        Text(stringResource(R.string.tiempo_por_aplicacion), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary, style = MaterialTheme.typography.labelLarge)
         Spacer(Modifier.height(4.dp))
-        Text(stringResource(R.string.toca_fuera), fontSize = 11.sp, color = TextMuted)
+        Text(stringResource(R.string.toca_fuera), fontSize = 11.sp, color = TextMuted, style = MaterialTheme.typography.bodyLarge)
         Spacer(Modifier.height(16.dp))
         NeonBarChart(data, heightDp = 420)
     }
@@ -613,9 +624,9 @@ private fun ExpandedBar(data: Map<String, Float>) {
 @Composable
 private fun ExpandedLine(data: Map<String, Float>) {
     Column {
-        Text(stringResource(R.string.tendencia_diaria), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+        Text(stringResource(R.string.tendencia_diaria), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary, style = MaterialTheme.typography.labelLarge)
         Spacer(Modifier.height(4.dp))
-        Text(stringResource(R.string.toca_fuera), fontSize = 11.sp, color = TextMuted)
+        Text(stringResource(R.string.toca_fuera), fontSize = 11.sp, color = TextMuted, style = MaterialTheme.typography.bodyLarge)
         Spacer(Modifier.height(16.dp))
         NeonLineChart(data, heightDp = 420)
     }

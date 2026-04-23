@@ -105,7 +105,7 @@ fun PantallaPrincipalMisiones(onBack: () -> Unit) {
 
             Text(
                 text = stringResource(R.string.misiones_hoy),
-                style = MaterialTheme.typography.headlineMedium
+                style = MaterialTheme.typography.titleLarge
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -144,14 +144,14 @@ fun PantallaPrincipalMisiones(onBack: () -> Unit) {
                     text = stringResource(R.string.no_hay_misiones),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold,
-                    color = Color.Gray
+                    color = Color.Gray,
                 )
             }
 
             Button(
                 onClick = onBack
             ) {
-                Text(stringResource(R.string.volver))
+                Text(stringResource(R.string.volver), style = MaterialTheme.typography.bodyLarge)
             }
         }
     }
@@ -179,7 +179,8 @@ fun PantallaPrincipalMisiones(onBack: () -> Unit) {
                     modifier = Modifier.padding(horizontal = 30.dp, vertical = 20.dp),
                     color = Color(0xFFFFD700),
                     fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.bodyLarge
                 )
             }
         }

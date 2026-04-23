@@ -5,6 +5,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -142,12 +143,14 @@ fun SalonDeTrofeos() {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         stringResource(R.string.salon_trofeos),
-                        fontSize = 18.sp, fontWeight = FontWeight.Black,
-                        color = Gold, letterSpacing = 2.sp
+                        fontSize = 30.sp, fontWeight = FontWeight.Black,
+                        color = Gold, letterSpacing = 2.sp,
+                        style = MaterialTheme.typography.titleLarge
                     )
                     Text(
                         stringResource(R.string.nivel_alcanzado, nivelActual),
-                        fontSize = 12.sp, color = TextMuted, letterSpacing = 1.sp
+                        fontSize = 12.sp, color = TextMuted, letterSpacing = 1.sp,
+                        style = MaterialTheme.typography.bodyLarge
                     )
                 }
             }
@@ -184,17 +187,18 @@ fun SalonDeTrofeos() {
                     Column {
                         Text(
                             stringResource(R.string.racha_actual), fontSize = 10.sp,
-                            color = TextMuted, letterSpacing = 2.sp, fontWeight = FontWeight.Bold
+                            color = TextMuted, letterSpacing = 2.sp, fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.bodyLarge
                         )
                         Text(
                             stringResource(R.string.racha_dias, rachaActual),
                             fontSize = 28.sp, fontWeight = FontWeight.Black,
-                            color = if (rachaActual > 0) Gold else TextMuted
+                            color = if (rachaActual > 0) Gold else TextMuted, style = MaterialTheme.typography.bodyLarge
                         )
                     }
                     Column(horizontalAlignment = Alignment.End) {
-                        Text(stringResource(R.string.actualiza_cada_dia), fontSize = 10.sp, color = TextMuted, textAlign = TextAlign.End)
-                        Text(stringResource(R.string.segun_tus_misiones), fontSize = 10.sp, color = TextMuted, textAlign = TextAlign.End)
+                        Text(stringResource(R.string.actualiza_cada_dia), fontSize = 10.sp, color = TextMuted, textAlign = TextAlign.End, style = MaterialTheme.typography.bodyLarge)
+                        Text(stringResource(R.string.segun_tus_misiones), fontSize = 10.sp, color = TextMuted, textAlign = TextAlign.End, style = MaterialTheme.typography.bodyLarge)
                     }
                 }
             }
@@ -228,7 +232,7 @@ fun SalonDeTrofeos() {
                         Text(
                             text = label, fontSize = 12.sp, fontWeight = FontWeight.Bold,
                             color = if (selectedTab == index) Color.Black else TextMuted,
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyLarge
                         )
                     }
                 }
@@ -308,7 +312,7 @@ fun SalonDeTrofeos() {
                                         stringResource(R.string.rango_dificultad, minDif, maxDif),
                                         fontSize = 12.sp,
                                         color = color.copy(alpha = 0.8f),
-                                        fontWeight = FontWeight.Bold
+                                        fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge
                                     )
                                 }
 
@@ -403,7 +407,8 @@ private fun HeroeCard(
                     if (unlocked) character.name else "???",
                     fontSize = 12.sp, fontWeight = FontWeight.Bold,
                     color = if (unlocked) Gold else TextMuted,
-                    textAlign = TextAlign.Center, maxLines = 1
+                    textAlign = TextAlign.Center, maxLines = 1,
+                    style = MaterialTheme.typography.bodyLarge
                 )
             }
         }
@@ -452,7 +457,7 @@ private fun EnemyCard(character: GameCharacter) {
                 ) {
                     Text(
                         stringResource(R.string.dificultad, character.config.dificultad),
-                        fontSize = 9.sp, color = Color.Black, fontWeight = FontWeight.Bold
+                        fontSize = 9.sp, color = Color.Black, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge
                     )
                 }
             }
@@ -467,7 +472,8 @@ private fun EnemyCard(character: GameCharacter) {
                 Text(
                     character.name,
                     fontSize = 12.sp, fontWeight = FontWeight.Bold,
-                    color = color, textAlign = TextAlign.Center, maxLines = 1
+                    color = color, textAlign = TextAlign.Center, maxLines = 1,
+                    style = MaterialTheme.typography.bodyLarge
                 )
             }
 
@@ -481,7 +487,8 @@ private fun EnemyCard(character: GameCharacter) {
                 Text(
                     condicionEnemigo(character),
                     fontSize = 9.sp, color = TextMuted,
-                    textAlign = TextAlign.Center, lineHeight = 13.sp
+                    textAlign = TextAlign.Center, lineHeight = 13.sp,
+                    style = MaterialTheme.typography.bodyLarge
                 )
             }
         }

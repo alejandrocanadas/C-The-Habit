@@ -18,6 +18,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,9 +49,10 @@ fun PantallaInicialEncuesta(
         ) {
             Text(
                 text = stringResource(R.string.app_name),
-                fontSize = 30.sp,
+                fontSize = 50.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = Color.White
+                color = Color.White,
+                style = MaterialTheme.typography.titleLarge
             )
 
             Spacer(modifier = Modifier.height(120.dp))
@@ -62,7 +64,8 @@ fun PantallaInicialEncuesta(
                 color = Color.White,
                 textAlign = TextAlign.Center,
                 lineHeight = 46.sp,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                style = MaterialTheme.typography.bodyLarge
             )
 
             Spacer(modifier = Modifier.height(100.dp))
@@ -81,7 +84,8 @@ fun PantallaInicialEncuesta(
                 Text(
                     text = stringResource(R.string.continuar),
                     fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.bodyLarge
                 )
             }
         }

@@ -80,7 +80,8 @@ fun PantallaBatallaMisiones(
                     text = stringResource(R.string.ver_misiones),
                     fontSize = 17.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = Color.White
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodyLarge
                 )
             }
         }

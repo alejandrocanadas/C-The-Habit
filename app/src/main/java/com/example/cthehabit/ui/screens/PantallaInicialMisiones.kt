@@ -16,6 +16,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -52,9 +53,10 @@ fun PantallaInicialMisiones(
 
             Text(
                 text = stringResource(R.string.app_name),
-                fontSize = 28.sp,
+                fontSize = 50.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = Color.Black
+                color = Color.Black,
+                style = MaterialTheme.typography.titleLarge
             )
 
             Spacer(modifier = Modifier.height(40.dp))
@@ -66,7 +68,8 @@ fun PantallaInicialMisiones(
                 color = Color.White,
                 textAlign = TextAlign.Center,
                 lineHeight = 34.sp,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                style = MaterialTheme.typography.bodyLarge
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -90,7 +93,8 @@ fun PantallaInicialMisiones(
                     text = stringResource(R.string.continuar),
                     color = Color.White,
                     fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.bodyLarge
                 )
             }
 
@@ -118,7 +122,8 @@ fun MissionRow(text: String) {
             fontSize = 18.sp,
             fontWeight = FontWeight.ExtraBold,
             lineHeight = 26.sp,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.bodyLarge
         )
     }
 }

@@ -42,6 +42,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.res.stringResource
 import com.example.cthehabit.R
 
@@ -90,9 +91,10 @@ fun PantallaPreguntas(onFinish: (Map<Int, List<String>>) -> Unit) {
 
             Text(
                 text = stringResource(R.string.app_name),
-                fontSize = 28.sp,
+                fontSize = 50.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = negro
+                color = negro,
+                style = MaterialTheme.typography.titleLarge
             )
 
             Spacer(modifier = Modifier.height(40.dp))
@@ -104,7 +106,8 @@ fun PantallaPreguntas(onFinish: (Map<Int, List<String>>) -> Unit) {
                 color = blanco,
                 textAlign = TextAlign.Center,
                 lineHeight = 34.sp,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                style = MaterialTheme.typography.bodyLarge
             )
 
             Spacer(modifier = Modifier.height(30.dp))
@@ -143,7 +146,8 @@ fun PantallaPreguntas(onFinish: (Map<Int, List<String>>) -> Unit) {
                 Text(
                     text = stringResource(R.string.selecciona_minimo, currentQuestion.minSelections),
                     color = Color.White,
-                    fontSize = 14.sp
+                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.labelSmall
                 )
             }
 
@@ -177,7 +181,8 @@ fun PantallaPreguntas(onFinish: (Map<Int, List<String>>) -> Unit) {
                             stringResource(R.string.finalizar),
                     color = Color.White,
                     fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.bodyLarge
                 )
             }
 
@@ -217,7 +222,8 @@ fun OpcionCard(
                 fontWeight = FontWeight.Bold,
                 color = Color.Black,
                 lineHeight = 22.sp,
-                modifier = Modifier.padding(12.dp)
+                modifier = Modifier.padding(12.dp),
+                style = MaterialTheme.typography.bodyLarge
             )
         }
     }

@@ -2,18 +2,44 @@ package com.example.cthehabit.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.example.cthehabit.R
 
 // Set of Material typography styles to start with
+
+
+val PixelFont = FontFamily(
+    Font(R.font.pixel_lowercase)
+)
+
+val TitleFont = FontFamily(
+    Font(R.font.pixel_uppercase)
+)
+
 val Typography = Typography(
+
     bodyLarge = TextStyle(
-        fontFamily = FontFamily.Default,
+        fontFamily = PixelFont,
         fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
+        fontSize = 18.sp,
+        lineHeight = 22.sp,
         letterSpacing = 0.5.sp
+    ),
+
+    titleLarge = TextStyle(
+        fontFamily = TitleFont,
+        fontWeight = FontWeight.Normal,
+        fontSize = 50.sp,
+        lineHeight = 28.sp
+    ),
+
+    labelSmall = TextStyle(
+        fontFamily = PixelFont,
+        fontWeight = FontWeight.Medium,
+        fontSize = 14.sp
     )
     /* Other default text styles to override
     titleLarge = TextStyle(

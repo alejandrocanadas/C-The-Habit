@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import com.example.cthehabit.ui.AuthViewModel
 import kotlinx.coroutines.launch
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import com.example.cthehabit.R
 
 @Composable
@@ -31,19 +32,20 @@ fun PantallaLogin(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = stringResource(R.string.inicia_sesion), style = MaterialTheme.typography.headlineSmall)
+        Text(text = stringResource(R.string.inicia_sesion), style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(24.dp))
 
         OutlinedTextField(
             value = email, onValueChange = { email = it },
-            label = { Text(stringResource(R.string.correo_electronico))}
+            label = { Text(stringResource(R.string.correo_electronico), style = MaterialTheme.typography.bodyLarge) },
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(Modifier.height(16.dp))
 
         OutlinedTextField(
             value = password, onValueChange = { password = it },
-            label = { Text(stringResource(R.string.contrasena))},
+            label = { Text(stringResource(R.string.contrasena), style = MaterialTheme.typography.bodyLarge)},
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth()
         )
@@ -76,7 +78,8 @@ fun PantallaLogin(
                     if (isLoading)
                         stringResource(R.string.ingresando)
                     else
-                        stringResource(R.string.iniciar_sesion)
+                        stringResource(R.string.iniciar_sesion),
+                    style = MaterialTheme.typography.bodyLarge
             )
         }
 
@@ -84,6 +87,7 @@ fun PantallaLogin(
 
         Text(
             text = stringResource(R.string.no_tienes_cuenta),
+            style = MaterialTheme.typography.labelSmall,
             modifier = Modifier.clickable { onRegistro() },
             color = MaterialTheme.colorScheme.primary
         )
@@ -91,7 +95,7 @@ fun PantallaLogin(
         Spacer(Modifier.height(16.dp))
 
         Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.volver))
+            Text(stringResource(R.string.volver), style = MaterialTheme.typography.bodyLarge)
         }
     }
 }

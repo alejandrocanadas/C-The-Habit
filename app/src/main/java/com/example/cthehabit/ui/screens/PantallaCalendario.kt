@@ -171,13 +171,13 @@ fun PantallaCalendario() {
             text = visibleMonth.month
                 .getDisplayName(TextStyle.FULL, Locale("es", "ES"))
                 .replaceFirstChar { it.uppercase() } + " ${visibleMonth.year}",
-            style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             color = Color.White,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 12.dp),
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.titleLarge
         )
 
         // ── Calendario con fondo blanco ──────────────────────────────────
@@ -221,7 +221,8 @@ fun PantallaCalendario() {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 12.dp),
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.bodyLarge
         )
 
         // ── Tarjetas de historial semanal ────────────────────────────────
@@ -231,7 +232,8 @@ fun PantallaCalendario() {
                 fontSize = 14.sp,
                 color = Color.Gray,
                 modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyLarge
             )
         } else {
             weekHistory.value.forEach { daySummary ->
@@ -277,7 +279,8 @@ fun MissionHistoryCard(
                 Text(
                     text = dateLabel,
                     fontSize = 12.sp,
-                    color = Color.Gray
+                    color = Color.Gray,
+                    style = MaterialTheme.typography.bodyLarge
                 )
                 Box(
                     modifier = Modifier
@@ -288,7 +291,8 @@ fun MissionHistoryCard(
                         text = statusLabel,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = statusTextColor
+                        color = statusTextColor,
+                        style = MaterialTheme.typography.bodyLarge
                     )
                 }
             }
@@ -310,6 +314,7 @@ fun MissionHistoryCard(
                     )
                 ),
                 fontSize = 12.sp,
+                style = MaterialTheme.typography.labelLarge,
                 color = if (daySummary.usageHours > daySummary.usageLimitHours)
                     Color(0xFFB71C1C)
                 else
@@ -336,6 +341,7 @@ fun MissionHistoryCard(
                     Text(
                         text = mission.text,
                         fontSize = 13.sp,
+                        style = MaterialTheme.typography.bodyLarge,
                         color = if (mission.completed)
                             MaterialTheme.colorScheme.onSurface
                         else

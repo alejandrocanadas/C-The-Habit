@@ -101,7 +101,8 @@ fun PantallaPerfil(
             fontSize = 18.sp,
             color = Color.Cyan,
             fontWeight = FontWeight.Bold,
-            letterSpacing = 6.sp
+            letterSpacing = 6.sp,
+            style = MaterialTheme.typography.titleLarge
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -133,7 +134,8 @@ fun PantallaPerfil(
             text = currentUser?.email ?: stringResource(R.string.sin_correo_registrado),
             color = Color.White,
             fontSize = 15.sp,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
+            style = MaterialTheme.typography.bodyLarge
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -146,7 +148,7 @@ fun PantallaPerfil(
         ) {
             Column(Modifier.padding(16.dp)) {
                 if (!tienePermiso) {
-                    Text(stringResource(R.string.faltan_permisos_de_uso), color = Color(0xFFFFB74D), fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.faltan_permisos_de_uso), color = Color(0xFFFFB74D), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(
                         onClick = {
@@ -156,11 +158,11 @@ fun PantallaPerfil(
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Cyan)
                     ) {
-                        Text(stringResource(R.string.conceder_permiso), color = Color.Black, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.conceder_permiso), color = Color.Black, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
                     }
                 } else {
-                    Text(stringResource(R.string.sincronizacion_activa), color = Color.Cyan, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                    Text(stringResource(R.string.siguiente_sincronizacion, remainingTime), color = Color.Gray, fontSize = 13.sp)
+                    Text(stringResource(R.string.sincronizacion_activa), color = Color.Cyan, fontWeight = FontWeight.Bold, fontSize = 14.sp, style = MaterialTheme.typography.bodyLarge)
+                    Text(stringResource(R.string.siguiente_sincronizacion, remainingTime), color = Color.Gray, fontSize = 13.sp, style = MaterialTheme.typography.labelLarge)
                 }
             }
         }
@@ -174,7 +176,7 @@ fun PantallaPerfil(
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2A2D42)),
             contentPadding = PaddingValues(0.dp)
         ) {
-            Text(stringResource(R.string.reiniciar_progreso), color = Color.White, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.reiniciar_progreso), color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -186,7 +188,7 @@ fun PantallaPerfil(
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F)),
             contentPadding = PaddingValues(0.dp)
         ) {
-            Text(stringResource(R.string.cerrar_sesion), color = Color.White, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.cerrar_sesion), color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
         }
 
         Spacer(modifier = Modifier.height(10.dp))

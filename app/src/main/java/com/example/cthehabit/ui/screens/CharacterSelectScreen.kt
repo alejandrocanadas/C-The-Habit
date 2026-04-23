@@ -66,10 +66,11 @@ fun CharacterSelectScreen(horas: Int, onStartGame: (Int, Int) -> Unit) {
     ) {
         Text(
             text       = stringResource(R.string.selecciona_heroe),
-            style      = MaterialTheme.typography.headlineMedium,
+            style = MaterialTheme.typography.titleLarge,
+            fontSize = 35.sp,
             fontWeight = FontWeight.Black,
             color      = Gold,
-            modifier   = Modifier.padding(bottom = 16.dp)
+            modifier   = Modifier.padding(bottom = 16.dp),
         )
 
         LazyVerticalGrid(
@@ -144,7 +145,8 @@ fun CharacterSelectScreen(horas: Int, onStartGame: (Int, Int) -> Unit) {
                             fontSize   = 12.sp,
                             fontWeight = FontWeight.Bold,
                             color      = if (unlocked) Gold else TextMuted,
-                            textAlign  = TextAlign.Center
+                            textAlign  = TextAlign.Center,
+                            style = MaterialTheme.typography.bodyLarge
                         )
                     }
                 }
@@ -161,7 +163,7 @@ fun CharacterSelectScreen(horas: Int, onStartGame: (Int, Int) -> Unit) {
                 .height(56.dp)
                 .padding(horizontal = 16.dp)
         ) {
-            Text(stringResource(R.string.a_luchar), fontWeight = FontWeight.Black, fontSize = 16.sp)
+            Text(stringResource(R.string.a_luchar), fontWeight = FontWeight.Black, fontSize = 16.sp, style = MaterialTheme.typography.bodyLarge)
         }
     }
 }

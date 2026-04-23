@@ -34,27 +34,29 @@ fun PantallaRegistro(
     ) {
         Text(
             text = stringResource(R.string.crear_cuenta),
-            style = MaterialTheme.typography.headlineSmall
+            style = MaterialTheme.typography.titleLarge
         )
         Spacer(Modifier.height(24.dp))
 
         OutlinedTextField(
             value = name, onValueChange = { name = it },
-            label = { Text( stringResource(R.string.nombre)) }
+            label = { Text( stringResource(R.string.nombre), style = MaterialTheme.typography.bodyLarge)},
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(Modifier.height(16.dp))
 
         OutlinedTextField(
             value = email, onValueChange = { email = it },
-            label = { Text(stringResource(R.string.correo_electronico)) }
+            label = { Text(stringResource(R.string.correo_electronico),style = MaterialTheme.typography.bodyLarge) },
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(Modifier.height(16.dp))
 
         OutlinedTextField(
             value = password, onValueChange = { password = it },
-            label = { Text(stringResource(R.string.contrasena))},
+            label = { Text(stringResource(R.string.contrasena), style = MaterialTheme.typography.bodyLarge)},
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth()
         )
@@ -87,7 +89,8 @@ fun PantallaRegistro(
                     if (isLoading)
                         stringResource(R.string.creando_cuenta)
                     else
-                        stringResource(R.string.crear_cuenta)
+                        stringResource(R.string.crear_cuenta),
+                style = MaterialTheme.typography.bodyLarge
             )
         }
 
@@ -96,13 +99,14 @@ fun PantallaRegistro(
         Text(
             text = stringResource(R.string.ya_tienes_cuenta),
             modifier = Modifier.clickable { onLogin() },
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.primary,
+            style = MaterialTheme.typography.labelSmall
         )
 
         Spacer(Modifier.height(16.dp))
 
         Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.volver))
+            Text(stringResource(R.string.volver), style = MaterialTheme.typography.bodyLarge)
         }
     }
 }

@@ -2,6 +2,7 @@ package com.example.cthehabit.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,21 +29,21 @@ fun PantallaInicio(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        Text(stringResource(R.string.c), fontSize = 130.sp)
+        Text(stringResource(R.string.c), fontSize = 180.sp, style = MaterialTheme.typography.titleLarge)
 
-        Text(stringResource(R.string.the_habit), fontSize = 50.sp)
+        Text(stringResource(R.string.the_habit), fontSize = 70.sp, style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(16.dp))
 
         Spacer(Modifier.height(40.dp))
 
         Button(onClick = onEmpezarClick, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.empezar))
+            Text(stringResource(R.string.empezar), style = MaterialTheme.typography.bodyLarge)
         }
 
         Spacer(Modifier.height(16.dp))
 
         Button(onClick = onLoginClick, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.inicia_sesion))
+            Text(stringResource(R.string.inicia_sesion), style = MaterialTheme.typography.bodyLarge)
         }
     }
 }

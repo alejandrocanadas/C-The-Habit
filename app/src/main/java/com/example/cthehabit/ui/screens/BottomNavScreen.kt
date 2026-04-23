@@ -23,6 +23,7 @@ import com.example.cthehabit.utils.*
 import java.text.SimpleDateFormat
 import java.util.*
 import androidx.compose.ui.res.stringResource
+import com.example.cthehabit.R
 
 // --- Definición de Destinos ---
 sealed class BottomNavDestination(val route: String, val label: String, val icon: String) {
@@ -80,7 +81,7 @@ fun BottomNavScreen(
                             }
                         },
                         icon = { Text(dest.icon, fontSize = 20.sp) },
-                        label = { Text(dest.label, fontSize = 10.sp) },
+                        label = { Text(dest.label, style = MaterialTheme.typography.labelLarge, fontSize = 10.sp) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = Color(0xFF4FC3F7),
                             selectedTextColor = Color(0xFF4FC3F7),
@@ -221,7 +222,7 @@ fun SeccionEstadisticas(usageViewModel: AppUsageViewModel, navController: NavHos
     var modoSieteDias by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("Estadísticas de Uso", style = MaterialTheme.typography.headlineMedium, color = Color.White)
+        Text(stringResource(R.string.estadisticas_uso), style = MaterialTheme.typography.titleLarge, color = Color.White, fontSize = 40.sp)
         Spacer(Modifier.height(16.dp))
 
         Button(
@@ -230,7 +231,7 @@ fun SeccionEstadisticas(usageViewModel: AppUsageViewModel, navController: NavHos
                 modoSieteDias = false
             },
             modifier = Modifier.fillMaxWidth()
-        ) { Text("Calcular Métricas 24h") }
+        ) { Text(stringResource(R.string.calcular_24h), style = MaterialTheme.typography.bodyLarge) }
 
         Spacer(Modifier.height(8.dp))
 
@@ -240,7 +241,7 @@ fun SeccionEstadisticas(usageViewModel: AppUsageViewModel, navController: NavHos
                 modoSieteDias = true
             },
             modifier = Modifier.fillMaxWidth()
-        ) { Text("Calcular últimos 7 días") }
+        ) { Text(stringResource(R.string.calcular_7dias), style = MaterialTheme.typography.bodyLarge) }
 
         Spacer(Modifier.height(16.dp))
 
@@ -252,7 +253,12 @@ fun SeccionEstadisticas(usageViewModel: AppUsageViewModel, navController: NavHos
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
             ) {
-                Text("📊 Ver Gráficas ${if (modoSieteDias) "7 días" else "24h"}")
+                Text(if (modoSieteDias)
+                    stringResource(R.string.ver_graficas_7dias)
+                else
+                    stringResource(R.string.ver_graficas_24h),
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
         }
 
@@ -281,8 +287,8 @@ fun SeccionEstadisticas(usageViewModel: AppUsageViewModel, navController: NavHos
                         colors = CardDefaults.cardColors(containerColor = Color(0xFF1F2235))
                     ) {
                         Row(Modifier.padding(12.dp), Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                            Text(getSocialAppNameLabel(app) ?: app, color = Color.White, modifier = Modifier.weight(1f))
-                            Text("${minutes.toInt()} min", color = Color.White, fontWeight = FontWeight.Bold)
+                            Text(getSocialAppNameLabel(app) ?: app, color = Color.White, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
+                            Text(stringResource(R.string.minutos, minutes.toInt()), color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
                         }
                     }
                 }

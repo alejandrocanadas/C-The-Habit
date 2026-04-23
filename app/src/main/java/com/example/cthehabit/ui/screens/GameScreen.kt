@@ -308,10 +308,11 @@ fun GameScreen(
                         stringResource(R.string.subir_nivel_batalla),
                         color = Color(0xFFFFD700),
                         fontWeight = FontWeight.Black,
-                        fontSize = 11.sp
+                        fontSize = 11.sp,
+                        style = MaterialTheme.typography.labelSmall
                     )
                 }
-                Text(stringResource(R.string.nivel,nivel), color = Color.Cyan, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.nivel,nivel), color = Color.Cyan, fontWeight = FontWeight.Bold,  style = MaterialTheme.typography.bodyLarge)
                 Box(
                     Modifier.width(140.dp).height(8.dp)
                         .clip(RoundedCornerShape(4.dp))
@@ -323,7 +324,7 @@ fun GameScreen(
                             .background(if (xpListo) Color(0xFFFFD700) else Color(0xFF4CAF50))
                     )
                 }
-                Text(stringResource(R.string.progreso_xp, xp, meta), color = Color.White, fontSize = 10.sp)
+                Text(stringResource(R.string.progreso_xp, xp, meta), color = Color.White, fontSize = 10.sp,  style = MaterialTheme.typography.labelSmall)
             }
 
             IconButton(
@@ -347,13 +348,13 @@ fun GameScreen(
         ) {
             Text(
                 stringResource(R.string.vida_usuario, "❤️".repeat(playerHp.coerceAtLeast(0))),
-                color = Color.White, fontWeight = FontWeight.Bold
+                color = Color.White, fontWeight = FontWeight.Bold,  style = MaterialTheme.typography.bodyLarge
             )
-            Text(habitLabel, color = Color.Gray, fontSize = 11.sp)
+            Text(habitLabel, color = Color.Gray, fontSize = 11.sp,  style = MaterialTheme.typography.bodyLarge)
             // CAMBIO 3: muestra golpes restantes / total (= dificultad)
             Text(
                 stringResource(R.string.vida_enemigo, enemyHp,enemyChar.config.dificultad),
-                color = Color.Red, fontWeight = FontWeight.Bold
+                color = Color.Red, fontWeight = FontWeight.Bold,  style = MaterialTheme.typography.bodyLarge
             )
         }
 
