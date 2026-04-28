@@ -24,6 +24,9 @@ import com.example.cthehabit.ui.game.CharacterState
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import androidx.compose.ui.res.stringResource
+import com.example.cthehabit.data.model.GameBackground
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import com.example.cthehabit.R
 
 private val BgDark    = Color(0xFF0D0D1A)
@@ -91,6 +94,7 @@ fun SalonDeTrofeos() {
     val userId = FirebaseAuth.getInstance().currentUser?.uid
     var nivelActual by remember { mutableStateOf(1) }
     var rachaActual by remember { mutableStateOf(0) }
+    var selectedBg by remember { mutableStateOf(0) }
 
     DisposableEffect(userId) {
         if (userId == null) return@DisposableEffect onDispose {}
@@ -100,12 +104,14 @@ fun SalonDeTrofeos() {
                 if (snapshot != null && snapshot.exists()) {
                     nivelActual = snapshot.getLong("currentLevel")?.toInt() ?: 1
                     rachaActual = snapshot.getLong("racha")?.toInt()        ?: 0
+                    selectedBg = snapshot.getLong("selectedBg")?.toInt() ?: 0
                 }
             }
         onDispose { reg.remove() }
     }
 
     val jugadoresDesbloqueados = minOf(1 + (nivelActual - 1) / 3, players.size)
+    val escenasDesbloqueadas = GameBackground.ALL.count { nivelActual >= it.unlockLevel }
 
     val pulseAnim = rememberInfiniteTransition(label = "pulse")
     val glowAlpha by pulseAnim.animateFloat(
@@ -208,13 +214,16 @@ fun SalonDeTrofeos() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 8.dp)
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(16.dp))
                     .background(BgCard)
+                    .padding(4.dp)
             ) {
-                listOf(
-                    stringResource(R.string.heroes, jugadoresDesbloqueados, players.size),
-                    stringResource(R.string.enemigos, GameCharacter.ENEMIES.size)
-                ).forEachIndexed { index, label ->
+                val tabs = listOf(
+                    Triple("⚔\uFE0E", "Héroes", "$jugadoresDesbloqueados/${players.size}"),
+                    Triple("💀\uFE0E", "Enemigos",   "${GameCharacter.ENEMIES.size}"),
+                    Triple("🏔\uFE0E", "Escenarios", "$escenasDesbloqueadas/${GameBackground.ALL.size}")
+                )
+                tabs.forEachIndexed { index, (icon, name, counter) ->
                     Box(
                         modifier = Modifier
                             .weight(1f)
@@ -226,14 +235,34 @@ fun SalonDeTrofeos() {
                                     Brush.horizontalGradient(listOf(Color.Transparent, Color.Transparent))
                             )
                             .clickable { selectedTab = index }
-                            .padding(vertical = 12.dp),
+                            .padding(vertical = 13.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = label, fontSize = 12.sp, fontWeight = FontWeight.Bold,
-                            color = if (selectedTab == index) Color.Black else TextMuted,
-                            textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyLarge
-                        )
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            Text(
+                                text     = icon,
+                                fontSize = 18.sp,
+                                color    = if (selectedTab == index) Color.Black else Color.White
+                            )
+                            Text(
+                                text       = name,
+                                fontSize   = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color      = if (selectedTab == index) Color.Black else Gold,
+                                textAlign  = TextAlign.Center,
+                                style      = MaterialTheme.typography.bodyLarge
+                            )
+                            Text(
+                                text      = counter,
+                                fontSize  = 9.sp,
+                                color     = if (selectedTab == index) Color.Black.copy(alpha = 0.6f) else TextMuted,
+                                textAlign = TextAlign.Center,
+                                style     = MaterialTheme.typography.bodyLarge
+                            )
+                        }
                     }
                 }
             }
@@ -268,7 +297,7 @@ fun SalonDeTrofeos() {
                         }
                     }
                 }
-            } else {
+            } else if (selectedTab == 1){
                 LazyColumn(
                     modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
                     contentPadding = PaddingValues(bottom = 24.dp, top = 4.dp),
@@ -334,6 +363,44 @@ fun SalonDeTrofeos() {
                                     Spacer(Modifier.height(10.dp))
                                 }
                             }
+                        }
+                    }
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
+                    contentPadding = PaddingValues(bottom = 24.dp, top = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    val rows = GameBackground.ALL.chunked(2)
+                    items(rows.size) { rowIndex ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            rows[rowIndex].forEachIndexed { colIndex, bg ->
+                                val globalIndex = rowIndex * 2 + colIndex
+                                val unlocked   = nivelActual >= bg.unlockLevel
+                                val isSelected = selectedBg == globalIndex
+                                Box(modifier = Modifier.weight(1f)) {
+                                    EscenarioCard(
+                                        background = bg,
+                                        unlocked   = unlocked,
+                                        isSelected = isSelected,
+                                        onClick    = {
+                                            if (unlocked) {
+                                                selectedBg = globalIndex
+                                                userId?.let {
+                                                    FirebaseFirestore.getInstance()
+                                                        .collection("users").document(it)
+                                                        .update("selectedBg", globalIndex)
+                                                }
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+                            if (rows[rowIndex].size == 1) Spacer(Modifier.weight(1f))
                         }
                     }
                 }
@@ -494,3 +561,86 @@ private fun EnemyCard(character: GameCharacter) {
         }
     }
 }
+
+@Composable
+private fun EscenarioCard(
+    background: GameBackground,
+    unlocked:   Boolean,
+    isSelected: Boolean,
+    onClick:    () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(160.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .border(
+                width = if (isSelected) 2.5.dp else 1.5.dp,
+                brush = if (isSelected)
+                    Brush.linearGradient(listOf(GoldDark, Gold))
+                else if (unlocked)
+                    Brush.linearGradient(listOf(TextMuted.copy(0.3f), TextMuted.copy(0.15f)))
+                else
+                    Brush.linearGradient(listOf(TextMuted.copy(0.1f), TextMuted.copy(0.05f))),
+                shape = RoundedCornerShape(16.dp)
+            )
+            .clickable { onClick() }
+    ) {
+        Image(
+            painter            = painterResource(background.drawableRes),
+            contentDescription = null,
+            modifier           = Modifier.fillMaxSize(),
+            contentScale       = ContentScale.Crop,
+            alpha              = if (unlocked) 1f else 0.25f
+        )
+        if (!unlocked) {
+            Box(
+                modifier         = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.5f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("🔒", fontSize = 28.sp)
+                    Text(
+                        "Nivel ${background.unlockLevel}",
+                        fontSize = 10.sp, color = TextMuted,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }
+        if (isSelected) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .clip(RoundedCornerShape(bottomStart = 8.dp))
+                    .background(Gold)
+                    .padding(horizontal = 6.dp, vertical = 3.dp)
+            ) {
+                Text(
+                    "✓ Activo", fontSize = 9.sp,
+                    color = Color.Black, fontWeight = FontWeight.Bold
+                )
+            }
+        }
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .background(Color.Black.copy(alpha = 0.5f))
+                .padding(vertical = 6.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text       = if (unlocked) background.name else "???",
+                fontSize   = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color      = if (unlocked) Gold else TextMuted,
+                textAlign  = TextAlign.Center,
+                style      = MaterialTheme.typography.bodyLarge
+            )
+        }
+    }
+}
+

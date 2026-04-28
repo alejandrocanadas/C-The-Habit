@@ -32,6 +32,10 @@ import java.util.Date
 import java.util.Locale
 import kotlin.math.abs
 import androidx.compose.ui.res.stringResource
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import com.example.cthehabit.data.model.GameBackground
 
 @Composable
 fun GameScreen(
@@ -46,11 +50,13 @@ fun GameScreen(
 
     val db     = FirebaseFirestore.getInstance()
     val userId = FirebaseAuth.getInstance().currentUser?.uid
+    val density = LocalDensity.current
     val scope  = rememberCoroutineScope()
     val today  = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()) }
 
     var nivel      by remember { mutableStateOf(1) }
     var xp         by remember { mutableStateOf(0) }
+    var bgIndex by remember { mutableStateOf(0) }
     var dataLoaded by remember { mutableStateOf(false) }
     fun xpMeta(lvl: Int) = 150 + ((lvl - 1) * 100)
 
@@ -64,6 +70,9 @@ fun GameScreen(
             val doc = db.collection("users").document(userId).get().await()
             nivel = (doc.getLong("currentLevel") ?: 1L).toInt()
             xp    = (doc.getLong("xp")           ?: 0L).toInt()
+            bgIndex = (doc.getLong("selectedBg") ?: 0L).toInt()
+                .coerceIn(0, GameBackground.ALL.size - 1)
+
         } catch (_: Exception) {}
     }
 
@@ -173,9 +182,11 @@ fun GameScreen(
     var isAttacking by remember { mutableStateOf(false) }
     var movingLeft  by remember { mutableStateOf(false) }
     var movingRight by remember { mutableStateOf(false) }
+    var wrapBound   by remember { mutableStateOf(280f) }
 
     fun estaEnRango() = abs(playerX - enemyX) < 80f
     val enemyRotation = if (playerX > enemyX) 180f else 0f
+    val playerRotation = if (playerX > enemyX) 180f else 0f
 
     LaunchedEffect(enemyHp, playerHp) {
         while (enemyHp > 0 && playerHp > 0) {
@@ -193,26 +204,33 @@ fun GameScreen(
     }
 
 
-    LaunchedEffect(enemyHp, playerHp) {
-        while (enemyHp > 0 && playerHp > 0) {
-            delay(2000)
-            if (estaEnRango() && enemyState != CharacterState.HURT && enemyHp > 0) {
-                enemyState = CharacterState.ATTACKING
-                delay(500)
-                val mirandoAlJugador = (enemyRotation == 180f && playerX > enemyX) ||
-                        (enemyRotation == 0f && playerX < enemyX)
-                if (estaEnRango() && mirandoAlJugador && playerHp > 0) {
-                    playerHp--
-                    if (playerHp <= 0) {
-                        playerState = CharacterState.DEATH
-                    } else {
-                        playerState = CharacterState.HURT
-                        delay(400)
-                        if (playerHp > 0) playerState = CharacterState.IDLE
+    LaunchedEffect(enemyHp, playerHp > 0) {
+        try{
+            while (enemyHp > 0 && playerHp > 0) {
+                delay(2000)
+                if (estaEnRango() && enemyState != CharacterState.HURT && enemyHp > 0) {
+                    enemyState = CharacterState.ATTACKING
+                    delay(500)
+                    val currentRotation = if (playerX > enemyX) 180f else 0f
+                    val mirandoAlJugador = (currentRotation == 180f && playerX > enemyX) ||
+                            (currentRotation == 0f && playerX < enemyX)
+                    if (estaEnRango() && mirandoAlJugador && playerHp > 0) {
+                        playerHp--
+                        if (playerHp <= 0) {
+                            playerState = CharacterState.DEATH
+                        } else {
+                            playerState = CharacterState.HURT
+                            delay(400)
+                            if (playerHp > 0) playerState = CharacterState.IDLE
+                        }
                     }
+                    delay(300)
+                    if (enemyHp > 0) enemyState = CharacterState.IDLE
                 }
-                delay(300)
-                if (enemyHp > 0) enemyState = CharacterState.IDLE
+            }
+        } finally {
+            if (enemyState == CharacterState.ATTACKING && playerHp > 0){
+                enemyState = CharacterState.IDLE
             }
         }
     }
@@ -221,19 +239,25 @@ fun GameScreen(
         if (!isAttacking && enemyHp > 0) {
             isAttacking = true
             playerState = CharacterState.ATTACKING
-            if (estaEnRango() && enemyX > playerX) {
-                scope.launch {
-                    enemyHp--
-                    if (enemyHp <= 0) {
-                        enemyState = CharacterState.DEATH
-                    } else {
-                        enemyState = CharacterState.HURT
+            val attackDuration = playerChar.config.attacks.first().frames * 1000L / 8L
+            val preDamageDelay  = attackDuration * 4L / 5L          // 80% of animation
+            val postDamageDelay = attackDuration - preDamageDelay   // remaining 20%
+
+            delay(preDamageDelay)
+            
+            if (estaEnRango()) {
+                enemyHp--
+                if (enemyHp <= 0) {
+                    enemyState = CharacterState.DEATH
+                } else {
+                    enemyState = CharacterState.HURT
+                    scope.launch {
                         delay(500)
                         if (enemyHp > 0) enemyState = CharacterState.IDLE
                     }
                 }
             }
-            delay(400)
+            delay(postDamageDelay)
             isAttacking = false
             if (playerState == CharacterState.ATTACKING) playerState = CharacterState.IDLE
         }
@@ -259,6 +283,7 @@ fun GameScreen(
             playerHp    = 3
             playerX     = -150f
             playerState = CharacterState.IDLE
+            enemyState  = CharacterState.IDLE
         }
     }
 
@@ -266,8 +291,8 @@ fun GameScreen(
         while (movingLeft || movingRight) {
             if (movingLeft)  playerX -= 10f
             if (movingRight) playerX += 10f
-            if (playerX >  320f) playerX = -320f
-            if (playerX < -320f) playerX =  320f
+            if (playerX >  wrapBound) playerX = -(wrapBound - 200f)
+            if (playerX < -wrapBound) playerX =  (wrapBound - 200f)
             if (!isAttacking && playerState != CharacterState.HURT && playerHp > 0)
                 playerState = CharacterState.WALKING
             delay(16)
@@ -361,6 +386,9 @@ fun GameScreen(
         // ARENA
         Box(
             Modifier.weight(1f).fillMaxWidth()
+                .onSizeChanged { size ->
+                    wrapBound = with(density) { size.width.toDp().value } / 2f + 100f
+                }
                 .pointerInput(Unit) {
                     detectTapGestures(onPress = { offset ->
                         val w = size.width.toFloat()
@@ -375,8 +403,9 @@ fun GameScreen(
                     })
                 }
         ) {
+        
             Image(
-                painter      = painterResource(R.drawable.zfall_night),
+                painter = painterResource(GameBackground.ALL[bgIndex].drawableRes),
                 contentDescription = null,
                 modifier     = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
@@ -387,7 +416,7 @@ fun GameScreen(
                     .size(200.dp)
                     .offset(x = playerX.dp)
                     .align(Alignment.BottomCenter)
-                    .graphicsLayer { rotationY = 0f },
+                    .graphicsLayer { rotationY = playerRotation },
                 character   = playerChar,
                 spriteState = playerState
             )
