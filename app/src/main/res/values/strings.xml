@@ -76,8 +76,8 @@
     <string name="minutos_acumulados"> Minutos de uso acumulados </string>
     <string name="tendencia_diaria"> Tendencia diaria </string>
     <string name="minutos_totales_dia"> Minutos totales por día</string>
-    <string name="ultimas_24h"> ÚLTIMAS 24H </string>
-    <string name="ultimos_7d"> ÚLTIMOS 7 DÍAS</string>
+    <string name="ultimas_24h"> ULTIMAS 24H </string>
+    <string name="ultimos_7d"> ULTIMOS 7 DÍAS</string>
     <string name="analisis_uso"> Análisis de uso</string>
     <string name="toca_fuera"> Toca fuera para cerrar</string>
 
@@ -95,7 +95,7 @@
     <string name="a_luchar"> ¡A LUCHAR! </string>
 
     <!--Trofeos-->
-    <string name="salon_trofeos"> ⚔  SALÓN DE TROFEOS  ⚔ </string>
+    <string name="salon_trofeos"> ⚔  SALON DE TROFEOS  ⚔ </string>
     <string name="nivel_alcanzado"> Nivel alcanzado: %1$d </string>
     <string name="racha_actual"> RACHA ACTUAL </string>
     <string name="racha_dias"> 🔥 %1$d días </string>

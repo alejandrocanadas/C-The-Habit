@@ -81,7 +81,7 @@ fun BottomNavScreen(
                             }
                         },
                         icon = { Text(dest.icon, fontSize = 20.sp) },
-                        label = { Text(dest.label, style = MaterialTheme.typography.labelLarge, fontSize = 10.sp) },
+                        label = { Text(dest.label, style = MaterialTheme.typography.bodyLarge, fontSize = 11.sp) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = Color(0xFF4FC3F7),
                             selectedTextColor = Color(0xFF4FC3F7),
