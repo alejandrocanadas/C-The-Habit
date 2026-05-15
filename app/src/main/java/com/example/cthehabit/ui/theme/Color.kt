@@ -2,10 +2,16 @@ package com.example.cthehabit.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+// Paleta CTheHabit
+val DeepPurple    = Color(0xFF3C004E)
+val DarkPurple    = Color(0xFF361A6B)
+val MidPurple     = Color(0xFF323488)
+val NavyBlue      = Color(0xFF2B4EA6)
+val BrightBlue    = Color(0xFF2668C2)
+val SkyBlue       = Color(0xFF419BC9)
+val Cyan          = Color(0xFF5CCED1)
+val PixelWhite    = Color(0xFFFFFFFF)
+val PixelBlack    = Color(0xFF000000)
+val PixelBackground = Color(0xFF090814)
+val PixelSurface    = Color(0xFF12102A)

@@ -1,46 +1,31 @@
 package com.example.cthehabit.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.material3.Scaffold
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.runtime.rememberCoroutineScope
+import com.example.cthehabit.R
 import com.example.cthehabit.data.entity.UserMission
 import com.example.cthehabit.data.repositories.FirestoreRepository
-import com.example.cthehabit.utils.getTodayDate
-import kotlinx.coroutines.launch
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.AlertDialog
+import com.example.cthehabit.ui.theme.*
 import com.example.cthehabit.utils.DailyMissionPlanner
 import com.example.cthehabit.utils.MissionGenerator
-import androidx.compose.ui.res.stringResource
-import com.example.cthehabit.R
+import com.example.cthehabit.utils.getTodayDate
+import kotlinx.coroutines.launch
 
 @Composable
 fun PantallaPrincipalMisiones(onBack: () -> Unit) {
@@ -48,13 +33,11 @@ fun PantallaPrincipalMisiones(onBack: () -> Unit) {
     val firestoreRepository = remember { FirestoreRepository() }
 
     var missions by remember { mutableStateOf<List<UserMission>>(emptyList()) }
-
     var showXp by remember { mutableStateOf(false) }
     var xpGanada by remember { mutableStateOf(0) }
 
     LaunchedEffect(Unit) {
         val today = getTodayDate()
-
         val todayResult = firestoreRepository.getTodayMissions(today)
 
         todayResult.onSuccess { loadedTodayMissions ->
@@ -93,146 +76,256 @@ fun PantallaPrincipalMisiones(onBack: () -> Unit) {
         }
     }
 
-    Scaffold { innerPadding ->
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(PixelBackground)
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
-                .padding(16.dp)
+                .padding(horizontal = 32.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(Modifier.height(56.dp))
 
+            // Mini header — igual que Login/Registro
+            Row(
+                verticalAlignment = Alignment.Bottom,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(R.string.c),
+                    fontSize = 26.sp,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = PixelWhite
+                )
+                Spacer(Modifier.width(10.dp))
+                Text(
+                    text = stringResource(R.string.the_habit),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = SkyBlue,
+                    letterSpacing = 3.sp
+                )
+            }
+
+            Spacer(Modifier.height(8.dp))
+            HorizontalDivider(color = NavyBlue, thickness = 1.dp)
+            Spacer(Modifier.height(24.dp))
+
+            // Título de sección
             Text(
                 text = stringResource(R.string.misiones_hoy),
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleLarge,
+                fontSize = 28.sp,
+                color = Cyan,
+                modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            // Contador de misiones pendientes
+            Text(
+                text = "${missions.size} PENDIENTES",
+                style = MaterialTheme.typography.labelSmall,
+                color = NavyBlue,
+                fontSize = 9.sp,
+                letterSpacing = 2.sp
+            )
 
-            missions.forEach { mission ->
-                MissionCard(
-                    mission = mission,
-                    onComplete = {
-                        scope.launch {
-                            val completeResult = firestoreRepository.completeMission(mission.id)
-                            val xpResult = firestoreRepository.addXpToUser(50)
+            Spacer(Modifier.height(28.dp))
 
-                            if (completeResult.isSuccess && xpResult.isSuccess) {
-                                xpGanada = 50
-                                showXp = true
+            // Lista de misiones
+            if (missions.isEmpty()) {
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    text = stringResource(R.string.no_hay_misiones),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MidPurple,
+                    fontSize = 12.sp,
+                    letterSpacing = 1.sp
+                )
+                Spacer(Modifier.height(16.dp))
+            } else {
+                missions.forEach { mission ->
+                    PixelMissionCard(
+                        mission = mission,
+                        onComplete = {
+                            scope.launch {
+                                val completeResult = firestoreRepository.completeMission(mission.id)
+                                val xpResult = firestoreRepository.addXpToUser(50)
+                                if (completeResult.isSuccess && xpResult.isSuccess) {
+                                    xpGanada = 50
+                                    showXp = true
+                                    missions = missions.filter { it.id != mission.id }
+                                }
+                            }
+                        },
+                        onCancel = {
+                            scope.launch {
+                                firestoreRepository.cancelMission(mission.id)
                                 missions = missions.filter { it.id != mission.id }
                             }
                         }
-                    },
-                    onCancel = {
-                        scope.launch {
-                            firestoreRepository.cancelMission(mission.id)
-                            missions = missions.filter { it.id != mission.id }
-                        }
-                    }
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
+                    )
+                    Spacer(Modifier.height(12.dp))
+                }
             }
 
-            if (missions.isEmpty()) {
-                Spacer(modifier = Modifier.height(30.dp))
+            Spacer(Modifier.height(8.dp))
+            HorizontalDivider(color = NavyBlue, thickness = 1.dp)
+            Spacer(Modifier.height(20.dp))
 
-                Text(
-                    text = stringResource(R.string.no_hay_misiones),
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Gray,
-                )
-            }
-
+            // Botón volver — mismo estilo que Ingresar/Crear cuenta
             Button(
-                onClick = onBack
+                onClick = onBack,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(4.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = PixelSurface,
+                    contentColor = PixelWhite,
+                ),
+                border = BorderStroke(1.dp, NavyBlue),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
             ) {
-                Text(stringResource(R.string.volver), style = MaterialTheme.typography.bodyLarge)
-            }
-        }
-    }
-
-    if (showXp) {
-
-        // Esto hace que desaparezca después de 2 segundos
-        LaunchedEffect(Unit) {
-            kotlinx.coroutines.delay(2000)
-            showXp = false
-        }
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Card(
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1C2C)),
-                elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
-            ) {
+                Icon(
+                    imageVector = Icons.Filled.PlayArrow,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(Modifier.width(8.dp))
                 Text(
-                    text = stringResource(R.string.xp_ganada,xpGanada),
-                    modifier = Modifier.padding(horizontal = 30.dp, vertical = 20.dp),
-                    color = Color(0xFFFFD700),
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
+                    text = stringResource(R.string.volver),
                     style = MaterialTheme.typography.bodyLarge
                 )
+            }
+
+            Spacer(Modifier.height(32.dp))
+        }
+
+        // XP Toast — aparece centrado con estilo oscuro
+        if (showXp) {
+            LaunchedEffect(Unit) {
+                kotlinx.coroutines.delay(2000)
+                showXp = false
+            }
+
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(4.dp),
+                    color = PixelSurface,
+                    border = BorderStroke(1.dp, Cyan),
+                    tonalElevation = 8.dp
+                ) {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 36.dp, vertical = 20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "+$xpGanada XP",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontSize = 28.sp,
+                            color = Cyan
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = "MISIÓN COMPLETADA",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = SkyBlue,
+                            fontSize = 9.sp,
+                            letterSpacing = 2.sp
+                        )
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-fun MissionCard(
+fun PixelMissionCard(
     mission: UserMission,
     onComplete: () -> Unit,
     onCancel: () -> Unit
 ) {
-    Card(
+    Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFDDF1FA))
+        shape = RoundedCornerShape(4.dp),
+        color = PixelSurface,
+        border = BorderStroke(1.dp, NavyBlue),
+        tonalElevation = 0.dp
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 18.dp),
+                .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = mission.text,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                lineHeight = 22.sp,
-                modifier = Modifier.weight(1f)
-            )
+            // Texto de la misión
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "MISIÓN",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = NavyBlue,
+                    fontSize = 8.sp,
+                    letterSpacing = 2.sp
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = mission.text,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = PixelWhite,
+                    lineHeight = 20.sp
+                )
+            }
 
-            Column (
-                horizontalAlignment = Alignment.CenterHorizontally
-            ){
-                IconButton(onClick = onComplete) {
+            Spacer(Modifier.width(12.dp))
+
+            // Botones de acción
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                // Completar
+                IconButton(
+                    onClick = onComplete,
+                    modifier = Modifier
+                        .size(36.dp)
+                        .background(
+                            color = Cyan.copy(alpha = 0.1f),
+                            shape = RoundedCornerShape(4.dp)
+                        )
+                ) {
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = stringResource(R.string.completar),
-                        tint = Color(0xFF00A86B)
+                        tint = Cyan,
+                        modifier = Modifier.size(18.dp)
                     )
                 }
 
-                IconButton(onClick = onCancel) {
+                // Cancelar
+                IconButton(
+                    onClick = onCancel,
+                    modifier = Modifier
+                        .size(36.dp)
+                        .background(
+                            color = MidPurple.copy(alpha = 0.1f),
+                            shape = RoundedCornerShape(4.dp)
+                        )
+                ) {
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = stringResource(R.string.cancelar_accion),
-                        tint = Color.Red
+                        tint = MidPurple,
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }
-
         }
     }
 }

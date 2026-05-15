@@ -1,54 +1,55 @@
 package com.example.cthehabit.ui.theme
 
 import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary          = Cyan,           // CTA principal, botones activos
+    onPrimary        = PixelBlack,     // Texto sobre primary
+    secondary        = SkyBlue,        // Acento secundario
+    onSecondary      = PixelBlack,
+    tertiary         = BrightBlue,     // Acento terciario
+    onTertiary       = PixelWhite,
+    background       = DeepPurple,     // Fondo base de pantallas
+    onBackground     = PixelWhite,     // Texto sobre fondo
+    surface          = DarkPurple,     // Cards, campos, superficies
+    onSurface        = PixelWhite,     // Texto sobre surface
+    surfaceVariant   = MidPurple,      // Variante de superficie (inputs, chips)
+    onSurfaceVariant = Cyan,           // Texto/iconos sobre surfaceVariant
+    outline          = SkyBlue,        // Bordes de inputs y divisores
+    error            = Color(0xFFFF6B6B),
+    onError          = PixelBlack
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    primary          = NavyBlue,
+    onPrimary        = PixelWhite,
+    secondary        = BrightBlue,
+    onSecondary      = PixelWhite,
+    tertiary         = SkyBlue,
+    onTertiary       = PixelBlack,
+    background       = PixelWhite,
+    onBackground     = PixelBlack,
+    surface          = Color(0xFFF0F4FF),
+    onSurface        = PixelBlack,
+    surfaceVariant   = Color(0xFFDDE3F5),
+    onSurfaceVariant = NavyBlue,
+    outline          = MidPurple,
+    error            = Color(0xFFB00020),
+    onError          = PixelWhite
 )
 
 @Composable
 fun CTheHabitTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
+    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
     MaterialTheme(
         colorScheme = colorScheme,

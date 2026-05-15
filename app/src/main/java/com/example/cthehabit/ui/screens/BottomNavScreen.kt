@@ -81,7 +81,7 @@ fun BottomNavScreen(
                             }
                         },
                         icon = { Text(dest.icon, fontSize = 20.sp) },
-                        label = { Text(dest.label, style = MaterialTheme.typography.bodyLarge, fontSize = 11.sp) },
+                        label = { Text(dest.label, style = MaterialTheme.typography.bodyLarge, fontSize = if (dest == BottomNavDestination.Calendario) 9.5.sp else 11.sp) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = Color(0xFF4FC3F7),
                             selectedTextColor = Color(0xFF4FC3F7),
