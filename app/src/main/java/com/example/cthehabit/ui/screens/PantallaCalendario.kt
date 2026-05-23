@@ -147,12 +147,11 @@ fun PantallaCalendario() {
         dayStatusMap.value = statusMap
         val rachaCalculada = calcularRachaDesdeAyer(statusMap)
 
-// LA GUARDAMOS EN LA BASE DE DATOS (Esto crea el campo si no existe)
         val userId = FirebaseAuth.getInstance().currentUser?.uid
         if (userId != null) {
             FirebaseFirestore.getInstance().collection("users")
                 .document(userId)
-                .update("racha", rachaCalculada) // Firestore creará el campo "racha" aquí
+                .update("racha", rachaCalculada)
         }
 
         weekHistory.value = history.sortedByDescending { it.date }
@@ -180,7 +179,6 @@ fun PantallaCalendario() {
             style = MaterialTheme.typography.titleLarge
         )
 
-        // ── Calendario con fondo blanco ──────────────────────────────────
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
@@ -212,7 +210,7 @@ fun PantallaCalendario() {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // ── Título historial ─────────────────────────────────────────────
+
         Text(
             text = stringResource(R.string.historial_misiones),
             fontWeight = FontWeight.Bold,
@@ -225,7 +223,6 @@ fun PantallaCalendario() {
             style = MaterialTheme.typography.bodyLarge
         )
 
-        // ── Tarjetas de historial semanal ────────────────────────────────
         if (weekHistory.value.isEmpty()) {
             Text(
                 text = stringResource(R.string.no_hay_historial),
@@ -270,7 +267,6 @@ fun MissionHistoryCard(
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
 
-            // Encabezado: fecha + badge de estado
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -443,14 +439,13 @@ fun LegendItem(color: Color, label: String) {
     }
 }
 
-// Función lógica para contar días verdes seguidos desde ayer
 
 fun calcularRachaDesdeAyer(statusMap: Map<String, DayStatus>): Int {
     var contador = 0
-    var fecha = LocalDate.now().minusDays(1) // Empezamos desde ayer
+    var fecha = LocalDate.now().minusDays(1)
 
     // La racha continúa si el día es GOOD o REGULAR
-    // Se detiene únicamente si es BAD o si no hay datos (NONE)
+
     while (statusMap[fecha.toString()] == DayStatus.GOOD ||
         statusMap[fecha.toString()] == DayStatus.REGULAR) {
         contador++

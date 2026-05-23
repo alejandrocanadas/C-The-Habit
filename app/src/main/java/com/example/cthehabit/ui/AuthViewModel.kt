@@ -32,7 +32,7 @@ class AuthViewModel(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
-    // Login
+
     fun login(
         email: String,
         password: String,
@@ -59,7 +59,7 @@ class AuthViewModel(
         }
     }
 
-    // Registro
+
     fun register(
         email: String,
         password: String,
@@ -86,7 +86,7 @@ class AuthViewModel(
         }
     }
 
-    // Logout
+
     fun logout(onComplete: () -> Unit = {}) {
         viewModelScope.launch {
             try {
@@ -103,7 +103,7 @@ class AuthViewModel(
         }
     }
 
-    // Guardar cuestionario
+
     fun saveQuestionnaire(
         answers: Map<Int, List<String>>,
         onSuccess: () -> Unit,
@@ -117,7 +117,7 @@ class AuthViewModel(
         }
     }
 
-    // Guardar uso diario
+
     fun saveUsageEvent(
         context: Context,
         onSuccess: () -> Unit = {},
@@ -150,7 +150,7 @@ class AuthViewModel(
     }
 }
 
-// Factory
+
 class AuthViewModelFactory(private val sessionManager: SessionManager) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(AuthViewModel::class.java)) {

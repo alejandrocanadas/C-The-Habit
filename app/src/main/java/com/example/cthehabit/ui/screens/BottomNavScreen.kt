@@ -25,7 +25,7 @@ import java.util.*
 import androidx.compose.ui.res.stringResource
 import com.example.cthehabit.R
 
-// --- Definición de Destinos ---
+
 sealed class BottomNavDestination(val route: String, val label: String, val icon: String) {
     object Estadisticas : BottomNavDestination("estadisticas", "Stats",      "📊")
     object Calendario   : BottomNavDestination("calendar",     "Calendario", "📅")
@@ -55,7 +55,7 @@ fun BottomNavScreen(
     val currentRoute = navBackStackEntry?.destination?.route
     val context = LocalContext.current
 
-    // Registrar auto-refresh una sola vez al montar la pantalla
+    // Registrar auto-refresh una sola vez al la pantalla
     LaunchedEffect(Unit) {
         usageViewModel.observeSyncAndAutoRefresh(context)
     }
@@ -207,7 +207,7 @@ fun BottomNavScreen(
                         innerNavController.navigate(BottomNavDestination.Trofeos.route)
                     },
                     onOpenMissions = {
-                        innerNavController.navigate("misiones_internas") // 👈 ESTA ES LA CLAVE
+                        innerNavController.navigate("misiones_internas")
                     }
                 )
             }

@@ -35,7 +35,7 @@ fun PantallaInicio(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            // Logo "C"
+
             Text(
                 text = stringResource(R.string.c),
                 fontSize = 120.sp,
@@ -45,7 +45,7 @@ fun PantallaInicio(
                 lineHeight = 110.sp
             )
 
-            // Línea decorativa bajo la C
+
             HorizontalDivider(
                 color = Cyan,
                 thickness = 2.dp,
@@ -75,16 +75,10 @@ fun PantallaInicio(
 
             Spacer(Modifier.height(48.dp))
 
-            // Aquí va tu sprite:
-            // Image(
-            //     painter = painterResource(R.drawable.tu_sprite),
-            //     contentDescription = null,
-            //     modifier = Modifier.size(96.dp)
-            // )
 
             Spacer(Modifier.height(48.dp))
 
-            // Botón primario — Nueva partida
+
             Button(
                 onClick = onEmpezarClick,
                 modifier = Modifier
@@ -113,7 +107,7 @@ fun PantallaInicio(
 
             Spacer(Modifier.height(12.dp))
 
-            // Botón secundario — Continuar
+
             Button(
                 onClick = onLoginClick,
                 modifier = Modifier

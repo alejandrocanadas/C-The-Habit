@@ -49,13 +49,10 @@ class AppUsageViewModel : ViewModel() {
 
         appContext = context.applicationContext
 
-        // Carga inicial al abrir la app
         viewModelScope.launch(Dispatchers.IO) {
             val data = getUsageLast24h(appContext!!)
-            // ── Check de notificaciones en la carga inicial ──────────────────
             val minutes = getTodaySocialMinutes(data)
             NotificationHelper.checkAndNotify(appContext!!, minutes)
-            // ─────────────────────────────────────────────────────────────────
             withContext(Dispatchers.Main) {
                 usageData.value = data
             }
@@ -70,10 +67,8 @@ class AppUsageViewModel : ViewModel() {
                     val data = if (currentMode == "7d") getUsageLast7Days(ctx)
                     else getUsageLast24h(ctx)
 
-                    // ── Check de notificaciones en cada auto-refresh ─────────
                     val minutes = getTodaySocialMinutes(data)
                     NotificationHelper.checkAndNotify(ctx, minutes)
-                    // ─────────────────────────────────────────────────────────
                     withContext(Dispatchers.Main) {
                         usageData.value = data
                     }

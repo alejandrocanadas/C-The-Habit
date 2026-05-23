@@ -42,7 +42,7 @@ fun CharacterSelectScreen(horas: Int, onStartGame: (Int, Int) -> Unit) {
     var nivelActual    by remember { mutableStateOf(1) }
     val userId = FirebaseAuth.getInstance().currentUser?.uid
 
-    // Lista de jugadores desde el enum GameCharacter — sin Characters.PLAYERS
+    // Lista de jugadores itch io
     val players = remember { GameCharacter.PLAYERS }
 
     LaunchedEffect(Unit) {
@@ -117,7 +117,7 @@ fun CharacterSelectScreen(horas: Int, onStartGame: (Int, Int) -> Unit) {
                         )
                     }
 
-                    // Candado
+
                     if (!unlocked) {
                         Text(
                             text     = "🔒",
@@ -130,7 +130,7 @@ fun CharacterSelectScreen(horas: Int, onStartGame: (Int, Int) -> Unit) {
                         )
                     }
 
-                    // Nombre en la parte inferior de la card
+
                     Box(
                         modifier = Modifier
                             .align(Alignment.BottomCenter)

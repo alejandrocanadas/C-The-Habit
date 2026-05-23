@@ -20,6 +20,7 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun PantallaPrincipal(
+    //YA no la estamos usando con el cambio yeya
     navController: NavHostController,
     authViewModel: AuthViewModel,
     usageViewModel: AppUsageViewModel,
@@ -104,7 +105,7 @@ fun PantallaPrincipal(
         Text("Siguiente sincronización en: $remainingTime", color = Color.Gray)
         Spacer(Modifier.height(32.dp))
 
-        // BOTÓN JUGAR
+
         Button(
             onClick = { onJugarClick(5) },
             modifier = Modifier.fillMaxWidth().height(56.dp),
@@ -115,7 +116,7 @@ fun PantallaPrincipal(
 
         Spacer(Modifier.height(16.dp))
 
-        // BOTÓN MISIONES
+
         Button(
             onClick = onMisionesClick,
             modifier = Modifier.fillMaxWidth().height(56.dp)
@@ -125,7 +126,7 @@ fun PantallaPrincipal(
 
         Spacer(Modifier.height(16.dp))
 
-        // BOTÓN REINICIAR NIVEL
+
         OutlinedButton(
             onClick = { mostrarConfirmacion = true },
             modifier = Modifier.fillMaxWidth().height(56.dp),

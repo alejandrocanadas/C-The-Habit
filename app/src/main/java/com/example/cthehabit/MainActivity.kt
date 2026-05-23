@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 1. Pedir permiso de notificaciones (Android 13+)
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
                 != PackageManager.PERMISSION_GRANTED
@@ -42,17 +42,13 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // 2. Crear canal de notificaciones de alerta
+
         NotificationHelper.createChannel(this)
 
-        // 3. Arrancar el Foreground Service (monitoreo continuo en background)
         UsageMonitorService.start(this)
 
-        // 4. Mantener el Worker como respaldo (por si el servicio se cae)
         SyncAppsUsageWorker.schedule(this)
 
-        // SOLO PARA PRUEBAS: descomenta para resetear el contador de notificaciones
-        // getSharedPreferences("notif_prefs", MODE_PRIVATE).edit().clear().apply()
 
         enableEdgeToEdge()
 

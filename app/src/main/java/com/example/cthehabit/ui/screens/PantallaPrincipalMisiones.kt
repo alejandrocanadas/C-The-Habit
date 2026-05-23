@@ -89,7 +89,7 @@ fun PantallaPrincipalMisiones(onBack: () -> Unit) {
         ) {
             Spacer(Modifier.height(56.dp))
 
-            // Mini header — igual que Login/Registro
+
             Row(
                 verticalAlignment = Alignment.Bottom,
                 modifier = Modifier.fillMaxWidth()
@@ -113,7 +113,7 @@ fun PantallaPrincipalMisiones(onBack: () -> Unit) {
             HorizontalDivider(color = NavyBlue, thickness = 1.dp)
             Spacer(Modifier.height(24.dp))
 
-            // Título de sección
+
             Text(
                 text = stringResource(R.string.misiones_hoy),
                 style = MaterialTheme.typography.titleLarge,
@@ -122,7 +122,7 @@ fun PantallaPrincipalMisiones(onBack: () -> Unit) {
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // Contador de misiones pendientes
+
             Text(
                 text = "${missions.size} PENDIENTES",
                 style = MaterialTheme.typography.labelSmall,
@@ -133,7 +133,7 @@ fun PantallaPrincipalMisiones(onBack: () -> Unit) {
 
             Spacer(Modifier.height(28.dp))
 
-            // Lista de misiones
+
             if (missions.isEmpty()) {
                 Spacer(Modifier.height(16.dp))
                 Text(
@@ -174,7 +174,7 @@ fun PantallaPrincipalMisiones(onBack: () -> Unit) {
             HorizontalDivider(color = NavyBlue, thickness = 1.dp)
             Spacer(Modifier.height(20.dp))
 
-            // Botón volver — mismo estilo que Ingresar/Crear cuenta
+
             Button(
                 onClick = onBack,
                 modifier = Modifier
@@ -203,7 +203,7 @@ fun PantallaPrincipalMisiones(onBack: () -> Unit) {
             Spacer(Modifier.height(32.dp))
         }
 
-        // XP Toast — aparece centrado con estilo oscuro
+
         if (showXp) {
             LaunchedEffect(Unit) {
                 kotlinx.coroutines.delay(2000)
@@ -265,7 +265,7 @@ fun PixelMissionCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // Texto de la misión
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "MISIÓN",
@@ -285,12 +285,12 @@ fun PixelMissionCard(
 
             Spacer(Modifier.width(12.dp))
 
-            // Botones de acción
+
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                // Completar
+
                 IconButton(
                     onClick = onComplete,
                     modifier = Modifier
@@ -308,7 +308,7 @@ fun PixelMissionCard(
                     )
                 }
 
-                // Cancelar
+
                 IconButton(
                     onClick = onCancel,
                     modifier = Modifier

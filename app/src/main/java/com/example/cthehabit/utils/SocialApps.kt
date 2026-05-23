@@ -7,13 +7,13 @@ object SocialApps {
         "com.zhiliaoapp.musically",   // TikTok
         "com.zhiliaoapp.musically.go",// TikTok Lite
         "com.reddit.frontpage",       // Reddit
-        "com.twitter.android",        // X / Twitter
+        "com.twitter.android",        // X o / Twitter
         "com.google.android.youtube", // YouTube
         "com.vsco.cam",               // VSCO
         "com.facebook.katana"         // Facebook
     )
 
-    // Función para obtener el nombre amigable de la app
+
     fun getAppName(packageName: String): String {
         val pkg = packageName.lowercase()
         return when {
@@ -24,7 +24,7 @@ object SocialApps {
             pkg.contains("reddit") -> "Reddit"
             pkg.contains("youtube") -> "YouTube"
             pkg.contains("vsco") -> "VSCO"
-            else -> packageName // si no coincide, deja el package original
+            else -> packageName
         }
     }
 }

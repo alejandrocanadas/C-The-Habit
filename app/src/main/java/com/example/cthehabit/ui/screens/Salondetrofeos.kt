@@ -514,7 +514,6 @@ private fun EnemyCard(character: GameCharacter) {
                     character   = character,
                     spriteState = CharacterState.IDLE
                 )
-                // Insignia de dificultad (esquina superior derecha)
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopEnd)

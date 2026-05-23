@@ -44,11 +44,8 @@
             </intent-filter>
         </activity>
 
-        <!-- Agrega esto -->
-        <activity
-            android:name=".ui.game.GameActivity"
-            android:exported="false"
-            android:label="Game" />
+
+
 
     </application>
 </manifest>

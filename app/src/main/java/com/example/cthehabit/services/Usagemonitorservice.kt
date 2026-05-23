@@ -18,11 +18,11 @@ class UsageMonitorService : Service() {
 
     companion object {
         private const val FOREGROUND_CHANNEL_ID = "usage_monitor_channel"
-        private const val FOREGROUND_NOTIF_ID = 1  // ID fijo de la notificación persistente
+        private const val FOREGROUND_NOTIF_ID = 1
 
-        // CAMBIA ESTO SEGÚN EL MODO
-        //    PRUEBA:      30_000L  (30 segundos)
-        //    PRODUCCIÓN:  300_000L (5 minutos)
+
+        //    Prueba:        (30 segundos)
+        //    Prototipo:   (5 minutos)
 
         private const val CHECK_INTERVAL_MS = 30_000L
 
@@ -39,13 +39,13 @@ class UsageMonitorService : Service() {
     override fun onCreate() {
         super.onCreate()
         createForegroundChannel()
-        // Arranca el servicio con una notificación persistente (requerido por Android)
+        // Arranca el servicio con una notificación
         startForeground(FOREGROUND_NOTIF_ID, buildForegroundNotification())
         startMonitoring()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // START_STICKY: Android reinicia el servicio si lo mata
+        // Android reinicia el servicio
         return START_STICKY
     }
 
@@ -57,7 +57,7 @@ class UsageMonitorService : Service() {
     }
 
 
-    // Loop principal: revisa el uso cada CHECK_INTERVAL_MS
+    // revisa el uso cada check interval
 
     private fun startMonitoring() {
         serviceScope.launch {
@@ -76,13 +76,13 @@ class UsageMonitorService : Service() {
     }
 
 
-    // Canal y notificación persistente del Foreground Service
+    // Canal y notificación del Foreground Service
 
     private fun createForegroundChannel() {
         val channel = NotificationChannel(
             FOREGROUND_CHANNEL_ID,
             "Monitor de uso",
-            NotificationManager.IMPORTANCE_LOW  // LOW = sin sonido, solo icono
+            NotificationManager.IMPORTANCE_LOW
         ).apply {
             description = "Servicio activo que monitorea tu uso de redes sociales"
         }

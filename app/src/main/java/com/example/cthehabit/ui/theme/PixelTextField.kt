@@ -28,7 +28,7 @@ fun PixelTextField(
     var isFocused by remember { mutableStateOf(false) }
 
     Column(modifier = modifier.fillMaxWidth()) {
-        // Label estático encima del campo
+
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
@@ -53,7 +53,7 @@ fun PixelTextField(
                 .onFocusChanged { isFocused = it.isFocused }
                 .padding(bottom = 8.dp)
         )
-        // Solo línea inferior — sin caja
+
         HorizontalDivider(
             color = if (isFocused) Cyan else NavyBlue,
             thickness = 1.dp

@@ -55,7 +55,7 @@ fun PantallaRegistro(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            // Mini header
+
             Row(
                 verticalAlignment = Alignment.Bottom,
                 modifier = Modifier.fillMaxWidth()
@@ -78,7 +78,7 @@ fun PantallaRegistro(
             HorizontalDivider(color = NavyBlue, thickness = 1.dp)
             Spacer(Modifier.height(24.dp))
 
-            // Título
+
             Text(
                 text = stringResource(R.string.crear_cuenta),
                 style = MaterialTheme.typography.titleLarge,
@@ -126,7 +126,7 @@ fun PantallaRegistro(
 
             Spacer(Modifier.height(24.dp))
 
-            // Barra progreso formulario — UI pura
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -156,7 +156,7 @@ fun PantallaRegistro(
 
             Spacer(Modifier.height(24.dp))
 
-            // Botón primario — Comenzar aventura
+
             Button(
                 onClick = {
                     isLoading = true

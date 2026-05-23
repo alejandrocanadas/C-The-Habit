@@ -16,8 +16,8 @@ object NotificationHelper {
     private const val CHANNEL_DESC = "Avisos cuando llevas demasiado tiempo en redes sociales"
 
     // CONFIGURACIÓN DE PRUEBAS
-    //    MODO_PRUEBA = true  → notifica cada 2 minutos
-    //    MODO_PRUEBA = false → notifica cada 60 minutos (1 hora)
+    //    MODO_PRUEBA = true notifica cada 2 minutos
+    //    MODO_PRUEBA = false notifica cada 60 minutos (1 hora)
 
     private const val MODO_PRUEBA = false
     private val THRESHOLD_MINUTES = if (MODO_PRUEBA) 2L else 60L
@@ -59,7 +59,7 @@ object NotificationHelper {
         } catch (e: SecurityException) { e.printStackTrace() }
     }
 
-    // Check principal: llamar tras cada sync o refresh
+
 
     fun checkAndNotify(context: Context, totalSocialMinutes: Long) {
         createChannel(context)
@@ -78,7 +78,7 @@ object NotificationHelper {
                 .apply()
         }
 
-        // Cuántas "unidades" (horas en prod, 2-min en prueba) se han completado hoy
+
         val unitsReached = (totalSocialMinutes / THRESHOLD_MINUTES).toInt()
         val lastNotified = prefs.getInt("last_notified_unit", 0)
 
@@ -127,10 +127,10 @@ object NotificationHelper {
                     "Llevas $totalMinutes minutos en redes sociales. ¡Recuerda tus misiones en C The Habit! 💪"
         } else {
             val title = when (unit) {
-                1    -> "⏱️ 1 hora en redes sociales"
-                2    -> "📱 Ya llevas 2 horas en redes"
-                3    -> "😬 3 horas... ¿todo bien?"
-                4    -> "🚨 4 horas en redes sociales hoy"
+                1    -> " 1 hora en redes sociales"
+                2    -> " Ya llevas 2 horas en redes"
+                3    -> " 3 horas... ¿todo bien?"
+                4    -> " 4 horas en redes sociales hoy"
                 else -> "📵 ${unit} horas en redes sociales"
             }
             val body = when {

@@ -50,7 +50,7 @@ fun PantallaLogin(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            // Mini header
+
             Row(
                 verticalAlignment = Alignment.Bottom,
                 modifier = Modifier.fillMaxWidth()
@@ -73,7 +73,7 @@ fun PantallaLogin(
             HorizontalDivider(color = NavyBlue, thickness = 1.dp)
             Spacer(Modifier.height(24.dp))
 
-            // Título
+
             Text(
                 text = stringResource(R.string.inicia_sesion),
                 style = MaterialTheme.typography.titleLarge,
@@ -84,7 +84,7 @@ fun PantallaLogin(
 
             Spacer(Modifier.height(32.dp))
 
-            // Campo email — solo línea inferior
+
             PixelTextField(
                 value = email,
                 onValueChange = { email = it },
@@ -94,7 +94,7 @@ fun PantallaLogin(
 
             Spacer(Modifier.height(20.dp))
 
-            // Campo contraseña
+
             PixelTextField(
                 value = password,
                 onValueChange = { password = it },
@@ -103,7 +103,7 @@ fun PantallaLogin(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
             )
 
-            // Error
+
             if (error != null) {
                 Spacer(Modifier.height(8.dp))
                 Text(
@@ -118,7 +118,7 @@ fun PantallaLogin(
 
             Spacer(Modifier.height(32.dp))
 
-            // Botón primario — Ingresar
+
             Button(
                 onClick = {
                     isLoading = true
@@ -170,7 +170,7 @@ fun PantallaLogin(
             HorizontalDivider(color = NavyBlue, thickness = 1.dp)
             Spacer(Modifier.height(16.dp))
 
-            // Racha anterior — decorativo, sin datos reales
+
             Text(
                 text = "RACHA ANTERIOR",
                 style = MaterialTheme.typography.labelSmall,
@@ -194,7 +194,7 @@ fun PantallaLogin(
 
             Spacer(Modifier.height(20.dp))
 
-            // Link — crear cuenta
+
             Text(
                 text = stringResource(R.string.no_tienes_cuenta),
                 style = MaterialTheme.typography.labelSmall,

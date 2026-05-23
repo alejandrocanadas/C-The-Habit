@@ -29,16 +29,16 @@ fun PantallaBatallaMisiones(
 ) {
     BackHandler { onBack() }
 
-    // Usamos Column para que el juego y el botón estén en compartimentos separados
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0D0E14)) // Color oscuro para que coincida con el juego
+            .background(Color(0xFF0D0E14))
     ) {
-        // 1. EL JUEGO (Ocupa todo lo que puede arriba)
+
         Box(
             modifier = Modifier
-                .weight(1f) // Esto empuja al botón hacia abajo
+                .weight(1f)
                 .fillMaxWidth()
         ) {
             GameScreen(
@@ -51,11 +51,11 @@ fun PantallaBatallaMisiones(
             )
         }
 
-        // 2. EL ÁREA DEL BOTÓN (Abajo del todo)
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 24.dp), // Espaciado para que no toque el borde
+                .padding(vertical = 24.dp),
             contentAlignment = Alignment.Center
         ) {
             Button(

@@ -376,14 +376,14 @@ fun GameScreen(
                 color = Color.White, fontWeight = FontWeight.Bold,  style = MaterialTheme.typography.bodyLarge
             )
             Text(habitLabel, color = Color.Gray, fontSize = 11.sp,  style = MaterialTheme.typography.bodyLarge)
-            // CAMBIO 3: muestra golpes restantes / total (= dificultad)
+
             Text(
                 stringResource(R.string.vida_enemigo, enemyHp,enemyChar.config.dificultad),
                 color = Color.Red, fontWeight = FontWeight.Bold,  style = MaterialTheme.typography.bodyLarge
             )
         }
 
-        // ARENA
+        
         Box(
             Modifier.weight(1f).fillMaxWidth()
                 .onSizeChanged { size ->

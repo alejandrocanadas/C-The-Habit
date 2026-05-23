@@ -68,7 +68,7 @@ fun PantallaGraficas(tipo: String) {
     val usageByApp   = getUsageByApp(apps)
     val dailyUsage   = getDailyUsage(apps)
 
-    // Mapeo a nombres
+
     val usageByAppFriendly: Map<String, Float> = usageByApp
         .mapKeys { SocialApps.getAppName(it.key) ?: it.key }
         .entries
@@ -207,7 +207,7 @@ private fun HeaderSection(tipo: String) {
     val tagColor = if (isToday) NeonAmber else NeonBlue
 
     Row(verticalAlignment = Alignment.CenterVertically) {
-        // Barra vertical de acento
+
         Box(
             modifier = Modifier
                 .width(4.dp)
@@ -254,7 +254,7 @@ private fun StatCard(
             .border(1.dp, Border, RoundedCornerShape(14.dp))
             .padding(horizontal = 8.dp, vertical = 14.dp)
     ) {
-        // Borde superior de acento
+
         Box(
             modifier = Modifier
                 .align(Alignment.TopCenter)
@@ -276,7 +276,7 @@ private fun StatCard(
                 fontSize = 9.sp,
                 color = TextMuted,
                 fontWeight = FontWeight.Medium,
-                letterSpacing = 1.2.sp, // Un poco menos de spacing para que no ocupe tanto
+                letterSpacing = 1.2.sp,
                 maxLines = 1,
                 style = MaterialTheme.typography.bodyLarge
             )
@@ -289,11 +289,11 @@ private fun StatCard(
                 style = MaterialTheme.typography.bodyLarge,
                 color = TextPrimary,
                 maxLines = 1,
-                // Si el texto es más largo que el espacio, se deslizará solo
+
                 modifier = Modifier.basicMarquee(
                     iterations = Int.MAX_VALUE,
                     initialDelayMillis = 2000,
-                    velocity = 30.dp, // Velocidad suave
+                    velocity = 30.dp,
                 )
 
             )
@@ -317,7 +317,7 @@ private fun ChartCard(
             .border(1.dp, Border, RoundedCornerShape(18.dp))
             .clickable { onClick() }
     ) {
-        // Resplandor sutil de acento arriba-izquierda
+
         Box(
             modifier = Modifier
                 .size(120.dp)
@@ -331,7 +331,6 @@ private fun ChartCard(
         )
 
         Column(modifier = Modifier.padding(18.dp)) {
-            // Título
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -352,7 +351,7 @@ private fun ChartCard(
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
-                // Chip "expandir"
+
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(20.dp))
@@ -371,7 +370,7 @@ private fun ChartCard(
 
             Spacer(Modifier.height(12.dp))
 
-            // Línea divisora con gradiente
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -430,7 +429,7 @@ fun NeonPieChart(data: Map<String, Float>, heightDp: Int = 260) {
 
         Spacer(Modifier.width(12.dp))
 
-        // Leyenda
+
         Column(
             modifier = Modifier
                 .weight(0.9f)
@@ -474,7 +473,7 @@ fun NeonPieChart(data: Map<String, Float>, heightDp: Int = 260) {
     }
 }
 
-// Bar chart neon
+// Bar chart
 @Composable
 fun NeonBarChart(data: Map<String, Float>, heightDp: Int = 280) {
     val labels = data.keys.toList()
@@ -531,7 +530,6 @@ fun NeonBarChart(data: Map<String, Float>, heightDp: Int = 280) {
 // Line chart neon
 @Composable
 fun NeonLineChart(data: Map<String, Float>, heightDp: Int = 260) {
-    // Ordenamiento cronológico día/mes
     val labels = data.keys.sortedWith(compareBy<String> {
         it.split("/").getOrNull(1)?.toIntOrNull() ?: 0
     }.thenBy {
@@ -581,7 +579,7 @@ fun NeonLineChart(data: Map<String, Float>, heightDp: Int = 260) {
                     textColor = android.graphics.Color.parseColor("#8892B0")
                     textSize  = 10f
 
-                    // Fuerza a que el eje Y empiece exactamente en 0
+
                     axisMinimum     = 0f
                 }
 

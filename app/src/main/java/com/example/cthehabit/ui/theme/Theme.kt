@@ -9,19 +9,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 private val DarkColorScheme = darkColorScheme(
-    primary          = Cyan,           // CTA principal, botones activos
-    onPrimary        = PixelBlack,     // Texto sobre primary
-    secondary        = SkyBlue,        // Acento secundario
+    primary          = Cyan,
+    onPrimary        = PixelBlack,
+    secondary        = SkyBlue,
     onSecondary      = PixelBlack,
-    tertiary         = BrightBlue,     // Acento terciario
+    tertiary         = BrightBlue,
     onTertiary       = PixelWhite,
-    background       = DeepPurple,     // Fondo base de pantallas
-    onBackground     = PixelWhite,     // Texto sobre fondo
-    surface          = DarkPurple,     // Cards, campos, superficies
-    onSurface        = PixelWhite,     // Texto sobre surface
-    surfaceVariant   = MidPurple,      // Variante de superficie (inputs, chips)
-    onSurfaceVariant = Cyan,           // Texto/iconos sobre surfaceVariant
-    outline          = SkyBlue,        // Bordes de inputs y divisores
+    background       = DeepPurple,
+    onBackground     = PixelWhite,
+    surface          = DarkPurple,
+    onSurface        = PixelWhite,
+    surfaceVariant   = MidPurple,
+    onSurfaceVariant = Cyan,
+    outline          = SkyBlue,
     error            = Color(0xFFFF6B6B),
     onError          = PixelBlack
 )
